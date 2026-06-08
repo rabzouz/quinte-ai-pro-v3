@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quinté+ IA Pro v3 — Analyse Avancée</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#d4a017;--gold2:#f0c040;--blue:#1e90e8;--purple:#9b59ff;
+  --green:#00e08a;--red:#ff4444;--orange:#ff8c00;--cyan:#00d4ff;
+  --bg:#070c14;--bg2:#0d1626;--bg3:#111e33;
+  --border:rgba(255,255,255,0.07);--text:#d8e4f0;--muted:#5a7090;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 10%,rgba(30,144,232,0.07) 0%,transparent 60%),radial-gradient(ellipse 50% 35% at 80% 90%,rgba(155,89,255,0.06) 0%,transparent 55%),radial-gradient(ellipse 40% 30% at 60% 50%,rgba(212,160,23,0.04) 0%,transparent 50%);pointer-events:none;z-index:0;}
+.wrap{max-width:480px;margin:0 auto;padding:0 12px 90px;position:relative;z-index:1;}
+
+/* ── HEADER ── */
+.hdr{text-align:center;padding:20px 0 12px;border-bottom:1px solid var(--border);margin-bottom:12px;}
+.hdr-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(212,160,23,0.12);border:1px solid rgba(212,160,23,0.3);border-radius:20px;padding:3px 12px;font-size:0.6em;letter-spacing:2px;text-transform:uppercase;color:var(--gold2);margin-bottom:7px;}
+.hdr h1{font-family:'Bebas Neue',sans-serif;font-size:2em;letter-spacing:3px;color:#fff;line-height:1;margin-bottom:3px;}
+.hdr h1 span{color:var(--gold);}
+.hdr-sub{font-size:0.63em;color:var(--muted);letter-spacing:1px;}
+
+/* ── STATS ── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:11px;}
+.sbox{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:8px 4px;text-align:center;}
+.sval{font-family:'Bebas Neue',sans-serif;font-size:1.15em;color:var(--gold2);}
+.slbl{font-size:0.5em;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:3px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:3px;margin-bottom:12px;overflow-x:auto;}
+.tab{flex:1;min-width:42px;padding:7px 2px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.52em;font-weight:600;cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap;line-height:1.3;}
+.tab.on{background:var(--bg3);color:#fff;}
+.tab.on.t-auto{color:var(--green);text-shadow:0 0 6px rgba(0,224,138,.3);}
+.tab.on.t-saisie{color:var(--gold2);}
+.tab.on.t-detail{color:var(--cyan);text-shadow:0 0 6px rgba(0,212,255,.3);}
+.tab.on.t-analyse{color:var(--orange);text-shadow:0 0 6px rgba(255,140,0,.3);}
+.tab.on.t-mc{color:var(--gold2);}
+.tab.on.t-poi{color:var(--blue);}
+.tab.on.t-ia{color:var(--purple);}
+.tab.on.t-fus{color:var(--green);}
+.tab.on.t-pro{color:var(--gold2);text-shadow:0 0 6px rgba(240,192,64,.4);}
+.tab.on.t-paris{color:var(--cyan);text-shadow:0 0 6px rgba(0,212,255,.4);}
+.tab.on.t-result{color:var(--green);text-shadow:0 0 6px rgba(0,224,138,.4);}
+.panel{display:none;}.panel.on{display:block;}
+
+/* ── SECTIONS ── */
+.sec{font-size:0.56em;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.sec::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:12px;margin-bottom:10px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border);}
+.card.cg::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.card.cb::before{background:linear-gradient(90deg,var(--blue),#6dd5fa);}
+.card.cp::before{background:linear-gradient(90deg,var(--purple),#c39bd3);}
+.card.cv::before{background:linear-gradient(90deg,var(--green),#00b894);}
+.card.cc::before{background:linear-gradient(90deg,var(--cyan),#00b0d8);}
+.card.co::before{background:linear-gradient(90deg,var(--orange),var(--gold2));}
+.card.ca::before{background:linear-gradient(90deg,var(--green),#00b0d8);}
+
+/* ── AUTO FETCH ── */
+.auto-box{background:var(--bg3);border:1px solid rgba(0,224,138,.15);border-radius:10px;padding:11px;font-size:.7em;line-height:1.65;white-space:pre-wrap;word-break:break-word;min-height:60px;}
+.auto-box.load{color:var(--muted);font-style:italic;}
+.auto-box.ok{border-color:rgba(0,224,138,.3);color:var(--text);}
+.auto-box.err{border-color:rgba(255,68,68,.25);color:#ff9999;}
+
+.date-picker-row{display:flex;gap:8px;margin-bottom:10px;}
+.date-btn{flex:1;padding:10px 4px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.65em;font-weight:600;cursor:pointer;text-align:center;transition:all .2s;}
+.date-btn.sel{background:rgba(0,224,138,.1);border-color:rgba(0,224,138,.3);color:var(--green);}
+.date-input-row{display:flex;gap:8px;margin-bottom:10px;align-items:center;}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82em;outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--gold);}
+
+/* ── PREVIEW PARTANTS (auto) ── */
+.part-card{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:9px 11px;margin-bottom:7px;font-size:.7em;}
+.part-card.joker{border-color:rgba(155,89,255,.35);background:linear-gradient(135deg,var(--bg3),rgba(155,89,255,.04));}
+.part-card.np{opacity:.45;border-color:rgba(255,68,68,.15);}
+.part-card.t5{border-color:rgba(212,160,23,.3);background:linear-gradient(135deg,var(--bg3),rgba(212,160,23,.04));}
+.pc-head{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.pc-num{font-family:'Bebas Neue',sans-serif;font-size:1.4em;color:var(--gold2);width:28px;text-align:center;}
+.pc-nom{flex:1;font-weight:600;font-size:1em;color:#fff;}
+.pc-cote{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-family:'JetBrains Mono',monospace;font-size:.85em;color:var(--gold2);font-weight:600;}
+.pc-tag{font-size:.65em;padding:1px 5px;border-radius:4px;font-weight:600;}
+.tag-joker{background:rgba(155,89,255,.2);color:var(--purple);}
+.tag-np{background:rgba(255,68,68,.15);color:#ff8888;}
+.pc-info{font-size:.78em;color:var(--muted);margin-bottom:5px;line-height:1.5;}
+.pc-info b{color:var(--text);font-weight:500;}
+.pc-musique{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-size:.9em;letter-spacing:1px;}
+.pc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px;}
+.pc-stat{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:5px 4px;text-align:center;}
+.pc-sval{font-family:'JetBrains Mono',monospace;font-size:.95em;font-weight:600;color:var(--text);}
+.pc-sval input{width:42px;background:transparent;border:none;color:var(--gold2);font-family:inherit;font-size:1em;text-align:center;outline:none;font-weight:600;}
+.pc-slbl{font-size:.55em;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+.pc-ctx{margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.04);font-size:.74em;color:var(--muted);line-height:1.5;font-style:italic;}
+
+/* ── SAISIE TABLE ── */
+.horse-table{width:100%;border-collapse:collapse;font-size:0.73em;}
+.horse-table th{background:var(--bg3);color:var(--muted);padding:6px 4px;text-align:center;font-size:0.7em;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);}
+.horse-table td{padding:5px 3px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:center;vertical-align:middle;}
+.horse-table tr:last-child td{border-bottom:none;}
+.horse-table input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:4px 6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95em;text-align:center;outline:none;}
+.horse-table input:focus{border-color:var(--gold);}
+.horse-table input.np-input{background:rgba(255,68,68,0.06);border-color:rgba(255,68,68,0.2);color:#ff8888;}
+.num-cell{font-family:'Bebas Neue',sans-serif;font-size:1.1em;color:var(--gold2);width:22px;}
+.np-toggle{width:20px;height:20px;cursor:pointer;accent-color:var(--red);}
+
+/* ── BTNS ── */
+.btn{width:100%;padding:12px;border:none;border-radius:11px;font-family:'Bebas Neue',sans-serif;font-size:.96em;letter-spacing:2px;cursor:pointer;margin-bottom:10px;transition:opacity .2s,transform .1s;position:relative;overflow:hidden;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);animation:sh 2s infinite;}
+@keyframes sh{to{left:200%;}}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;}
+.btn-purple{background:linear-gradient(135deg,var(--purple),#6c3dff);color:#fff;}
+.btn-prono{background:linear-gradient(135deg,#8B6914,var(--gold2));color:#000;}
+.btn-green{background:linear-gradient(135deg,#007a4d,var(--green));color:#000;}
+.btn-cyan{background:linear-gradient(135deg,#007a92,var(--cyan));color:#000;}
+
+/* ── PROGRESS ── */
+.prog{margin-bottom:10px;display:none;}
+.prog-t{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:4px;}
+.prog-f{height:100%;border-radius:3px;width:0;transition:width .15s linear;}
+.prog-fg{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.prog-fv{background:linear-gradient(90deg,var(--green),#00b0d8);}
+.prog-fp{background:linear-gradient(90deg,var(--purple),#c39bd3);}
+.prog-txt{font-size:.61em;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:center;}
+
+/* ── HORSE ROW ── */
+.hrow{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.hrow:last-child{border-bottom:none;}
+.hnum{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:0.68em;font-weight:600;flex-shrink:0;background:var(--bg3);color:var(--muted);}
+.hnum.t5{background:rgba(212,160,23,.15);color:var(--gold2);border:1px solid rgba(212,160,23,.3);}
+.hname{flex:1;font-size:0.72em;font-weight:500;}
+.hname small{display:block;font-size:.73em;color:var(--muted);}
+.hbar-w{flex:2;}
+.hbar{height:4px;border-radius:2px;background:var(--bg3);overflow:hidden;}
+.hbar-f{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1);width:0;}
+.bg{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.bb{background:linear-gradient(90deg,var(--blue),#6dd5fa);}
+.bv{background:linear-gradient(90deg,var(--green),#00b894);}
+.bpu{background:linear-gradient(90deg,var(--purple),#c39bd3);}
+.hpct{font-family:'JetBrains Mono',monospace;font-size:0.67em;font-weight:600;min-width:34px;text-align:right;color:var(--muted);}
+.hpct.t5{color:var(--gold2);}
+.rik{font-size:.75em;width:14px;text-align:center;flex-shrink:0;}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:5px;font-size:.58em;font-weight:600;font-family:'JetBrains Mono',monospace;}
+.bmc{background:rgba(212,160,23,.15);color:var(--gold2);}
+.bpo{background:rgba(30,144,232,.15);color:var(--blue);}
+.bia{background:rgba(155,89,255,.15);color:var(--purple);}
+.bfu{background:rgba(0,224,138,.15);color:var(--green);}
+
+/* ── FUSION ── */
+.frow{display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.frow:last-child{border-bottom:none;}
+.frank{font-family:'Bebas Neue',sans-serif;font-size:.95em;color:var(--muted);width:17px;text-align:center;flex-shrink:0;}
+.frank.t5{color:var(--green);}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.ldot{width:7px;height:7px;border-radius:2px;flex-shrink:0;}
+.li{display:flex;align-items:center;gap:4px;font-size:.6em;color:var(--muted);}
+.fnote{font-size:.6em;color:var(--muted);text-align:center;margin-bottom:8px;font-family:'JetBrains Mono',monospace;}
+
+/* ── IA ── */
+.ia-box{background:var(--bg3);border:1px solid rgba(155,89,255,.2);border-radius:9px;padding:10px;font-size:.72em;line-height:1.7;min-height:55px;white-space:pre-wrap;word-break:break-word;}
+.ia-box.load{color:var(--muted);font-style:italic;}
+.cur{display:inline-block;width:2px;height:1em;background:var(--purple);animation:blink .8s infinite;vertical-align:text-bottom;margin-left:2px;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── PRONOSTICS ── */
+.pcard{background:var(--bg2);border:1px solid var(--border);border-radius:15px;padding:13px;margin-bottom:11px;position:relative;overflow:hidden;}
+.pcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.pc1::before{background:linear-gradient(90deg,#ffd700,#ffa500);}
+.pc2::before{background:linear-gradient(90deg,#b0b0b0,#686868);}
+.pc3::before{background:linear-gradient(90deg,#cd7f32,#8B4513);}
+.pc4::before{background:linear-gradient(90deg,var(--purple),#5b2fe0);}
+.pc5::before{background:linear-gradient(90deg,var(--blue),#00b0d8);}
+.phdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
+.plbl{font-size:.57em;font-weight:600;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.ptit{font-family:'Bebas Neue',sans-serif;font-size:1em;letter-spacing:1px;color:#fff;}
+.pconf-w{display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
+.cbar{height:4px;width:52px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+.cbar-f{height:100%;border-radius:2px;}
+.cpct{font-family:'JetBrains Mono',monospace;font-size:.57em;text-align:right;}
+.pgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:9px;}
+.pg-item{text-align:center;}
+.pg-rank{font-size:.52em;color:var(--muted);margin-bottom:2px;font-family:'JetBrains Mono',monospace;}
+.pg-bub{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.2em;margin:0 auto 3px;}
+.r1{background:rgba(255,215,0,.18);border:1.5px solid rgba(255,215,0,.45);color:#ffd700;}
+.r2{background:rgba(192,192,192,.14);border:1.5px solid rgba(192,192,192,.3);color:#c8c8c8;}
+.r3{background:rgba(205,127,50,.14);border:1.5px solid rgba(205,127,50,.3);color:#cd7f32;}
+.r4{background:rgba(155,89,255,.12);border:1.5px solid rgba(155,89,255,.25);color:var(--purple);}
+.r5{background:rgba(30,144,232,.12);border:1.5px solid rgba(30,144,232,.25);color:var(--blue);}
+.pg-name{font-size:.5em;color:var(--muted);line-height:1.2;}
+.pmeta{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;}
+.ptag{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:2px 7px;font-size:.57em;color:var(--muted);}
+.ptag.hl{border-color:rgba(212,160,23,.35);color:var(--gold2);}
+.ptag.hg{border-color:rgba(0,224,138,.2);color:var(--green);}
+.ptag.hp{border-color:rgba(155,89,255,.2);color:var(--purple);}
+.pbet-sec{margin-bottom:8px;}
+.pbet-ttl{font-size:.6em;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.pbet-row{display:flex;gap:5px;flex-wrap:wrap;}
+.pbet{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:4px 8px;font-size:.62em;}
+.pbet-lbl{color:var(--muted);font-size:.85em;}
+.pbet-val{color:var(--gold2);font-family:'JetBrains Mono',monospace;font-weight:600;}
+.preason{background:var(--bg3);border-radius:8px;padding:8px 10px;font-size:.68em;color:var(--text);line-height:1.6;border-left:2px solid rgba(212,160,23,.25);}
+.verdict{background:linear-gradient(135deg,rgba(212,160,23,.08),rgba(155,89,255,.06));border:1px solid rgba(212,160,23,.2);border-radius:12px;padding:12px;margin-bottom:12px;}
+.vttl{font-size:.6em;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--gold2);margin-bottom:5px;}
+.vtxt{font-size:.74em;color:var(--text);line-height:1.65;font-style:italic;}
+.prono-log{background:var(--bg3);border:1px solid rgba(255,140,0,.2);border-radius:9px;padding:10px;font-size:.7em;line-height:1.7;white-space:pre-wrap;word-break:break-word;margin-bottom:10px;}
+.prono-log.load{color:var(--muted);font-style:italic;}
+
+/* ── METEO PANEL ── */
+.meteo-card{background:linear-gradient(135deg,rgba(30,144,232,.06),rgba(0,212,255,.04));border:1px solid rgba(30,144,232,.2);border-radius:12px;padding:11px;margin-bottom:10px;}
+.meteo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.meteo-cell{text-align:center;padding:5px;background:var(--bg3);border-radius:7px;}
+.meteo-icon{font-size:1.4em;}
+.meteo-val{font-family:'Bebas Neue',sans-serif;font-size:1em;color:var(--cyan);margin-top:2px;}
+.meteo-lbl{font-size:.55em;color:var(--muted);text-transform:uppercase;}
+.meteo-impact{font-size:.7em;color:var(--text);margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.04);font-style:italic;line-height:1.5;}
+
+/* ── MISC ── */
+.info-box{background:rgba(30,144,232,0.06);border:1px solid rgba(30,144,232,0.2);border-radius:8px;padding:8px 12px;font-size:.65em;color:#6dc8fa;margin-bottom:10px;line-height:1.5;}
+.warn{background:rgba(255,140,0,.06);border:1px solid rgba(255,140,0,.15);border-radius:8px;padding:7px 11px;font-size:.63em;color:#ffb060;text-align:center;margin-top:10px;}
+.empty{text-align:center;padding:22px;color:var(--muted);font-size:.75em;}
+.ei{font-size:2em;margin-bottom:7px;}
+.source-list{display:grid;grid-template-columns:1fr;gap:5px;margin-top:8px;}
+.source-link{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:7px 9px;color:var(--text);text-decoration:none;font-size:.65em;line-height:1.35;}
+.source-link small{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.82em;}
+.source-link:hover{border-color:rgba(0,212,255,.35);color:var(--cyan);}
+.course-info{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.ci-pill{background:var(--bg3);border:1px solid var(--border);border-radius:18px;padding:3px 9px;font-size:.58em;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.ci-pill b{color:var(--text);}
+.ci-pill.np{border-color:rgba(255,68,68,.2);color:#ff8888;}
+.ci-pill.weather{border-color:rgba(0,212,255,.2);color:var(--cyan);}
+.ci-pill.joker{border-color:rgba(155,89,255,.2);color:var(--purple);}
+.form-group{margin-bottom:10px;}
+.form-label{font-size:0.62em;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;display:block;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+.steps{display:flex;gap:5px;align-items:center;margin-bottom:12px;font-size:.62em;}
+.step{display:flex;align-items:center;gap:3px;color:var(--muted);}
+.step.done{color:var(--green);}
+.step.act{color:var(--gold2);}
+.sdot{width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:.65em;font-weight:bold;flex-shrink:0;}
+.ssep{flex:1;height:1px;background:var(--border);}
+
+/* ── DÉTAIL CHEVAL ONGLET ── */
+.detail-list{display:flex;flex-direction:column;gap:8px;}
+.detail-h{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:11px 12px;}
+.detail-h.t5{border-color:rgba(212,160,23,.25);}
+.detail-h.joker{border-color:rgba(155,89,255,.3);}
+.dh-head{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.dh-num{width:30px;height:30px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.2em;color:var(--gold2);flex-shrink:0;}
+.dh-name{flex:1;font-weight:600;font-size:.92em;color:#fff;}
+.dh-cote{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;font-family:'JetBrains Mono',monospace;font-weight:700;padding:3px 9px;border-radius:6px;font-size:.78em;}
+.dh-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;font-size:.68em;}
+.dh-cell{background:var(--bg3);border-radius:6px;padding:5px 8px;}
+.dh-cell .lbl{font-size:.82em;color:var(--muted);}
+.dh-cell .val{color:var(--text);font-weight:500;margin-top:1px;}
+.dh-musique{background:rgba(0,212,255,.06);border-radius:6px;padding:5px 8px;margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:.72em;color:var(--cyan);letter-spacing:1.5px;text-align:center;}
+.dh-perf{margin-top:6px;font-size:.7em;color:var(--muted);line-height:1.55;border-top:1px solid rgba(255,255,255,.04);padding-top:6px;}
+
+/* ── PARIS CARDS ── */
+.bet-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:13px;margin-bottom:11px;position:relative;overflow:hidden;}
+.bet-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.bet-tierce::before{background:linear-gradient(90deg,#cd7f32,#e8a857);}
+.bet-quarte::before{background:linear-gradient(90deg,#1e90e8,#6dd5fa);}
+.bet-quinte::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.bet-couple::before{background:linear-gradient(90deg,var(--green),#00b894);}
+.bet-2sur4::before{background:linear-gradient(90deg,var(--purple),#c39bd3);}
+.bet-multi::before{background:linear-gradient(90deg,var(--orange),var(--gold2));}
+.bet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.bet-title{font-family:'Bebas Neue',sans-serif;font-size:1.15em;letter-spacing:1px;color:#fff;display:flex;align-items:center;gap:6px;}
+.bet-type{font-size:.55em;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:10px;background:var(--bg3);color:var(--muted);}
+.bet-combo{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;align-items:center;}
+.bet-ball{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.15em;background:var(--bg3);border:1.5px solid var(--border);color:var(--text);position:relative;}
+.bet-ball.ord1{border-color:#ffd700;color:#ffd700;background:rgba(255,215,0,.1);}
+.bet-ball.ord2{border-color:#c0c0c0;color:#c0c0c0;background:rgba(192,192,192,.08);}
+.bet-ball.ord3{border-color:#cd7f32;color:#cd7f32;background:rgba(205,127,50,.08);}
+.bet-ball.ordX{border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,.06);}
+.bet-arrow{color:var(--muted);font-size:.8em;}
+.bet-line{font-size:.7em;color:var(--muted);margin-bottom:6px;line-height:1.5;}
+.bet-line b{color:var(--text);}
+.bet-variant{background:var(--bg3);border-radius:8px;padding:7px 10px;margin-bottom:6px;font-size:.68em;}
+.bet-variant-lbl{color:var(--cyan);font-weight:600;font-size:.92em;margin-bottom:3px;}
+.bet-variant-combo{font-family:'JetBrains Mono',monospace;color:var(--text);letter-spacing:.5px;}
+.bet-mise{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.04);font-size:.68em;}
+.bet-mise-lbl{color:var(--muted);}
+.bet-mise-val{font-family:'JetBrains Mono',monospace;color:var(--gold2);font-weight:600;}
+.bet-cost{background:rgba(212,160,23,.08);border:1px solid rgba(212,160,23,.2);border-radius:6px;padding:3px 8px;color:var(--gold2);font-family:'JetBrains Mono',monospace;font-size:.9em;font-weight:600;}
+
+
+/* ── ANALYSE / FEATURE IMPORTANCE ── */
+.weight-bar{display:flex;height:22px;border-radius:6px;overflow:hidden;margin-bottom:10px;border:1px solid var(--border);}
+.wseg{display:flex;align-items:center;justify-content:center;font-size:.5em;font-weight:600;color:#000;overflow:hidden;white-space:nowrap;}
+.ws-presse{background:#f0c040;} .ws-forme{background:#00e08a;} .ws-terrain{background:#1e90e8;}
+.ws-cote{background:#ff8c00;} .ws-driver{background:#9b59ff;} .ws-musique{background:#00d4ff;} .ws-meteo{background:#5a7090;}
+.wlegend{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
+.wl{display:flex;align-items:center;gap:4px;font-size:.6em;color:var(--muted);}
+.wl-dot{width:8px;height:8px;border-radius:2px;}
+.acard{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:11px;margin-bottom:9px;}
+.acard.t5{border-color:rgba(212,160,23,.25);}
+.ahead{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.anum{width:26px;height:26px;border-radius:7px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;color:var(--gold2);font-size:1.05em;flex-shrink:0;}
+.aname{flex:1;font-weight:600;font-size:.82em;}
+.ascore{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--gold2);font-size:.8em;}
+.acomp{display:flex;height:16px;border-radius:5px;overflow:hidden;border:1px solid var(--border);}
+.acseg{height:100%;}
+.value-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.value-card.opp{border-color:rgba(0,224,138,.35);background:linear-gradient(135deg,var(--bg2),rgba(0,224,138,.04));}
+.value-card.over{border-color:rgba(255,68,68,.2);opacity:.7;}
+.vc-num{width:30px;height:30px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.1em;flex-shrink:0;}
+.vc-info{flex:1;}
+.vc-name{font-weight:600;font-size:.78em;}
+.vc-detail{font-size:.62em;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:2px;}
+.vc-badge{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.85em;padding:3px 8px;border-radius:6px;}
+.vc-badge.opp{background:rgba(0,224,138,.15);color:var(--green);}
+.vc-badge.over{background:rgba(255,68,68,.12);color:#ff8888;}
+.vc-badge.fair{background:var(--bg3);color:var(--muted);}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-badge">🏇 PMU · IA Pro v3 · Analyse Avancée</div>
+  <h1>QUINTÉ+ <span>IA PRO</span></h1>
+  <div class="hdr-sub" id="hdrSub">Cotes · Musique · Météo · Drivers · IA</div>
+</div>
+
+<div class="stat-row">
+  <div class="sbox"><div class="sval" id="s-part">–</div><div class="slbl">Partants</div></div>
+  <div class="sbox"><div class="sval" id="s-sim">–</div><div class="slbl">MC</div></div>
+  <div class="sbox"><div class="sval" id="s-meth">0/3</div><div class="slbl">Méth.</div></div>
+  <div class="sbox"><div class="sval" id="s-data">–</div><div class="slbl">Données</div></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab t-auto on" onclick="sw('auto')">🤖 Auto</button>
+  <button class="tab t-saisie"  onclick="sw('saisie')">✏️ Manuel</button>
+  <button class="tab t-detail"  onclick="sw('detail')">📋 Détails</button>
+  <button class="tab t-analyse" onclick="sw('analyse')">📊 Analyse</button>
+  <button class="tab t-mc"      onclick="sw('mc')">📊 MC</button>
+  <button class="tab t-poi"     onclick="sw('poi')">🔵 Poisson</button>
+  <button class="tab t-ia"      onclick="sw('ia')">🤖 IA</button>
+  <button class="tab t-fus"     onclick="sw('fus')">⚡ Fusion</button>
+  <button class="tab t-pro"     onclick="sw('pro')">🏆 Pronos</button>
+  <button class="tab t-paris"   onclick="sw('paris')">🎫 Paris</button>
+  <button class="tab t-result"  onclick="sw('result')">✅ Résultat</button>
+</div>
+
+<!-- ════════════════════════════════════════
+     ONGLET AUTO
+════════════════════════════════════════ -->
+<div class="panel on" id="panel-auto">
+  <div class="sec">Récupération automatique enrichie · 5 étapes</div>
+  <div class="info-box">
+    🤖 L'IA récupère en 5 étapes : <b>partants & cotes</b>, <b>musique & profils chevaux</b>, <b>drivers/entraîneurs</b>, <b>météo & stats hippodrome</b>, <b>synthèse JSON</b>.
+  </div>
+  <div class="card cc">
+    <div style="font-size:.68em;color:var(--cyan);font-weight:600;margin-bottom:7px;letter-spacing:1px;">🔗 SOURCES COMPLÉMENTAIRES</div>
+    <div class="source-list">
+      <a class="source-link" href="https://www.pmu.fr/turf/quinte-du-jour/" target="_blank">PMU · Quinté du jour <small>officiel</small></a>
+      <a class="source-link" href="https://www.pmu.fr/turf/cote-courses/calendrier-courses-hippiques/" target="_blank">PMU · Calendrier courses <small>programme</small></a>
+      <a class="source-link" href="https://open-pmu-api.vercel.app/api/arrivee" target="_blank">Open PMU API · arrivée <small>api</small></a>
+      <a class="source-link" href="https://api.aspiturf.com/api" target="_blank">Aspiturf API <small>api</small></a>
+      <a class="source-link" href="https://www.paris-turf.com/programme-courses/aujourdhui" target="_blank">Paris-Turf · aujourd'hui <small>programme</small></a>
+      <a class="source-link" href="https://www.zone-turf.fr/quinte/rapport/" target="_blank">Zone-Turf · rapports <small>résultats</small></a>
+      <a class="source-link" href="https://www.turfomania.fr/" target="_blank">Turfomania · partants/pronos <small>presse</small></a>
+      <a class="source-link" href="https://www.canalturf.com/courses_quinte.php" target="_blank">Canalturf · Quinté <small>presse</small></a>
+      <a class="source-link" href="https://www.outilturfiste.com/pronostics_presse_quinte.php" target="_blank">OutilTurfiste · synthèse presse <small>consensus</small></a>
+      <a class="source-link" href="https://www.geny.com/reunions-courses-pmu" target="_blank">Geny · partants/statistiques <small>données</small></a>
+      <a class="source-link" href="https://github.com/nanaelie/open-pmu-api" target="_blank">GitHub · open-pmu-api <small>doc</small></a>
+    </div>
+  </div>
+
+  <div class="sec">Choisir une date</div>
+  <div class="date-picker-row" id="dateBtns"></div>
+  <div class="date-input-row">
+    <input type="date" class="form-input" id="autoDate" style="flex:1;">
+    <button onclick="setCustomDate()" style="padding:9px 14px;background:var(--bg3);border:1px solid var(--gold);border-radius:8px;color:var(--gold2);font-family:'DM Sans',sans-serif;font-size:.75em;cursor:pointer;white-space:nowrap;">Autre</button>
+  </div>
+  <div style="font-size:.65em;color:var(--muted);margin-bottom:10px;font-family:'JetBrains Mono',monospace;" id="selDateLbl">📅 ...</div>
+
+  <div class="sec">Clé API OpenAI ou Anthropic</div>
+  <div class="date-input-row">
+    <input type="password" class="form-input" id="apiKeyInput" placeholder="sk-proj-... ou sk-ant-..." autocomplete="off" style="flex:1;">
+    <button onclick="saveApiKey()" style="padding:9px 14px;background:var(--bg3);border:1px solid var(--green);border-radius:8px;color:var(--green);font-family:'DM Sans',sans-serif;font-size:.75em;cursor:pointer;white-space:nowrap;">Sauver</button>
+  </div>
+  <div style="font-size:.62em;color:var(--muted);margin-bottom:10px;font-family:'JetBrains Mono',monospace;" id="apiKeyStatus">Clé gardée localement dans ce navigateur. OpenAI recommandé si votre clé commence par sk-proj.</div>
+  <div class="date-input-row">
+    <input type="url" class="form-input" id="apiProxyInput" placeholder="Proxy OpenAI optionnel https://.../openai-proxy" autocomplete="off" style="flex:1;">
+    <button onclick="saveApiProxy()" style="padding:9px 14px;background:var(--bg3);border:1px solid var(--cyan);border-radius:8px;color:var(--cyan);font-family:'DM Sans',sans-serif;font-size:.75em;cursor:pointer;white-space:nowrap;">Proxy</button>
+  </div>
+  <div style="font-size:.62em;color:var(--muted);margin-bottom:10px;font-family:'JetBrains Mono',monospace;" id="apiProxyStatus">Sur Android, OpenAI peut nécessiter un proxy HTTPS.</div>
+
+  <button class="btn btn-green" id="autoBtn" onclick="runAutoFetch()">🔍 RÉCUPÉRER LES DONNÉES ENRICHIES</button>
+  <div class="prog" id="autoProg">
+    <div class="prog-t"><div class="prog-f prog-fv" id="autoFill"></div></div>
+    <div class="prog-txt" id="autoTxt">Recherche...</div>
+  </div>
+
+  <div class="card ca">
+    <div style="font-size:.68em;color:var(--green);font-weight:600;margin-bottom:7px;letter-spacing:1px;">📡 LOG RÉCUPÉRATION <span id="autoCur" style="display:none"><span class="cur" style="background:var(--green)"></span></span></div>
+    <div class="auto-box load" id="autoLog">Sélectionnez une date puis lancez la récupération. L'IA va analyser 5 sources de données pour vous fournir toutes les infos nécessaires.</div>
+  </div>
+
+  <div id="autoPreviewWrap" style="display:none;">
+    <div class="sec">Partants enrichis · Vérification</div>
+    <div id="autoMeteoBox"></div>
+    <div id="autoPreview"></div>
+    <button class="btn btn-green" onclick="validateAutoData()">✅ VALIDER & DÉMARRER L'ANALYSE</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ONGLET MANUEL
+════════════════════════════════════════ -->
+<div class="panel" id="panel-saisie">
+  <div class="sec">Course</div>
+  <div class="card co">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">📅 Date</label><input class="form-input" type="date" id="f-date"></div>
+      <div class="form-group"><label class="form-label">⏰ Heure</label><input class="form-input" type="time" id="f-heure" value="20:15"></div>
+    </div>
+    <div class="form-group"><label class="form-label">🏆 Nom course</label><input class="form-input" type="text" id="f-prix" placeholder="Prix..."></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">📍 Hippodrome</label><input class="form-input" type="text" id="f-hippo"></div>
+      <div class="form-group"><label class="form-label">📏 Distance</label><input class="form-input" type="text" id="f-dist"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">🐎 Discipline</label>
+        <select class="form-input" id="f-disc">
+          <option value="Trot Attelé">Trot Attelé</option>
+          <option value="Trot Monté">Trot Monté</option>
+          <option value="Plat">Plat</option>
+          <option value="Obstacle">Obstacle</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">💰 Allocation</label><input class="form-input" type="text" id="f-alloc"></div>
+    </div>
+  </div>
+  <div class="sec">Partants</div>
+  <div class="info-box">Saisissez nom, presse (/10), forme (/10), terrain (/10). Cochez NP si Non Partant.</div>
+  <div class="card" style="padding:8px;overflow-x:auto;">
+    <table class="horse-table" id="horsesTable">
+      <thead><tr><th>N°</th><th style="text-align:left;padding-left:6px;">Nom</th><th>Pre.</th><th>For.</th><th>Ter.</th><th>NP</th></tr></thead>
+      <tbody id="horsesBody"></tbody>
+    </table>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:10px;">
+    <button onclick="addHorse()" style="flex:1;padding:8px;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.72em;cursor:pointer;border-radius:8px;">+ Ajouter</button>
+    <button onclick="removeLastHorse()" style="flex:1;padding:8px;background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);color:#ff8888;font-family:'DM Sans',sans-serif;font-size:.72em;cursor:pointer;border-radius:8px;">− Suppr</button>
+  </div>
+  <button class="btn btn-green" onclick="validateManualData()">✅ VALIDER & DÉMARRER</button>
+</div>
+
+<!-- ════════════════════════════════════════
+     ONGLET DÉTAILS — fiche complète chevaux
+════════════════════════════════════════ -->
+<div class="panel" id="panel-detail">
+  <div class="course-info" id="ciDetail"></div>
+  <div class="sec">Fiche détaillée de chaque cheval</div>
+  <div class="info-box" style="border-color:rgba(0,212,255,.2);color:var(--cyan);">
+    📋 Toutes les informations récupérées : <b>cote, musique, sexe, âge, gains, ratio victoires, driver, entraîneur, dernière sortie</b>.
+  </div>
+  <div id="detailList"><div class="empty"><div class="ei">📋</div>Récupérez les données pour voir les fiches détaillées</div></div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ONGLET ANALYSE — Feature importance + Value bets
+════════════════════════════════════════ -->
+<div class="panel" id="panel-analyse">
+  <div class="course-info" id="ciAnalyse"></div>
+  <div class="sec">Pondérations du moteur (selon discipline)</div>
+  <div class="card co">
+    <div id="weightsDisplay"><div class="empty" style="padding:10px;"><div class="ei">📊</div>Validez les partants pour voir les pondérations</div></div>
+  </div>
+  <div class="sec">Recherche technique +</div>
+  <button class="btn btn-cyan" id="techBtn" onclick="runTechSearch()">🔬 LANCER MÉTHODE TECHNIQUE</button>
+  <div class="prog" id="techProg">
+    <div class="prog-t"><div class="prog-f prog-fp" id="techFill"></div></div>
+    <div class="prog-txt" id="techTxt">Analyse technique...</div>
+  </div>
+  <div class="card cc">
+    <div class="auto-box load" id="techLog">Analyse complémentaire : engagement, profil piste-distance, régularité, driver, météo, risques, value bet.</div>
+  </div>
+  <div id="techList"></div>
+  <div class="sec">Décomposition du score par cheval</div>
+  <div class="info-box" style="border-color:rgba(255,140,0,.2);color:#ffb060;">
+    📊 Chaque barre montre la <b>contribution de chaque critère</b> au score total. Permet de comprendre POURQUOI un cheval est bien classé.
+  </div>
+  <div id="featureList"><div class="empty"><div class="ei">📊</div>Validez les partants d'abord</div></div>
+  <div class="sec">🎯 Value Bets — Opportunités vs Marché</div>
+  <div class="info-box">
+    💎 Compare la <b>probabilité du modèle</b> à la <b>probabilité implicite de la cote</b> (1/cote). Un ratio &gt; 1 = cheval potentiellement <b>sous-coté</b> (opportunité). Lancez la Fusion pour de meilleurs résultats.
+  </div>
+  <div id="valueList"><div class="empty"><div class="ei">💎</div>Lancez Monte Carlo + IA puis revenez ici</div></div>
+</div>
+
+<!-- MC -->
+<div class="panel" id="panel-mc">
+  <div class="course-info" id="ciMC"></div>
+  <div class="sec">Monte Carlo · 100 000 simulations</div>
+  <button class="btn btn-gold" id="simBtn" onclick="runMC()">⚡ LANCER MONTE CARLO</button>
+  <div class="prog" id="simProg"><div class="prog-t"><div class="prog-f prog-fg" id="simFill"></div></div><div class="prog-txt" id="simTxt"></div></div>
+  <div class="card cg" id="mcCard"><div class="empty"><div class="ei">🎲</div>Validez les partants puis lancez</div></div>
+</div>
+
+<!-- POISSON -->
+<div class="panel" id="panel-poi">
+  <div class="course-info" id="ciPOI"></div>
+  <div class="sec">Distribution de Poisson — λ = prob × 5</div>
+  <div class="card cb" id="poiCard"><div class="empty"><div class="ei">📐</div>Lancez Monte Carlo d'abord</div></div>
+</div>
+
+<!-- IA -->
+<div class="panel" id="panel-ia">
+  <div class="course-info" id="ciIA"></div>
+  <div class="sec">Analyse IA Claude Sonnet</div>
+  <button class="btn btn-purple" id="iaBtn" onclick="runIA()">🤖 LANCER L'ANALYSE IA</button>
+  <div class="card" style="border-color:rgba(155,89,255,.2);">
+    <div style="font-size:.68em;color:var(--purple);font-weight:600;margin-bottom:7px;">RÉPONSE CLAUDE <span id="iaCur" style="display:none"><span class="cur"></span></span></div>
+    <div class="ia-box load" id="iaResp">L'analyse apparaîtra ici.</div>
+  </div>
+  <div class="card" style="border-color:rgba(155,89,255,.2);margin-top:9px;">
+    <div style="font-size:.68em;color:var(--purple);font-weight:600;margin-bottom:7px;">SCORES IA</div>
+    <div id="iaScores"><div class="empty"><div class="ei">🤖</div>Lancer l'IA</div></div>
+  </div>
+</div>
+
+<!-- FUSION -->
+<div class="panel" id="panel-fus">
+  <div class="course-info" id="ciFUS"></div>
+  <div class="sec">Fusion · MC 35% + Poisson 30% + IA 35%</div>
+  <div class="legend">
+    <div class="li"><div class="ldot" style="background:var(--gold2)"></div>MC 35%</div>
+    <div class="li"><div class="ldot" style="background:var(--blue)"></div>Poisson 30%</div>
+    <div class="li"><div class="ldot" style="background:var(--purple)"></div>IA 35%</div>
+  </div>
+  <div class="fnote" id="fusNote">⚠️ Lancez MC + IA pour la fusion complète</div>
+  <div class="card cv" id="fusCard"><div class="empty"><div class="ei">⚡</div>Méthodes non lancées</div></div>
+</div>
+
+<!-- PRONOSTICS -->
+<div class="panel" id="panel-pro">
+  <div class="course-info" id="ciPRO"></div>
+  <div class="sec">5 Pronostics Quinté+</div>
+  <div class="steps">
+    <div class="step" id="st1"><div class="sdot">1</div><span>MC</span></div>
+    <div class="ssep"></div>
+    <div class="step" id="st2"><div class="sdot">2</div><span>IA</span></div>
+    <div class="ssep"></div>
+    <div class="step" id="st3"><div class="sdot">3</div><span>Fusion</span></div>
+    <div class="ssep"></div>
+    <div class="step act" id="st4"><div class="sdot">4</div><span>Pronos</span></div>
+  </div>
+  <button class="btn btn-prono" id="pronoBtn" onclick="runPronos()">🏆 GÉNÉRER 5 PRONOSTICS</button>
+  <div class="prog" id="pronoProg"><div class="prog-t"><div class="prog-f prog-fp" id="pronoFill"></div></div><div class="prog-txt" id="pronoTxt"></div></div>
+  <div class="prono-log load" id="pronoLog">Les pronostics apparaîtront ici.</div>
+  <div id="pronoCont"></div>
+  <div class="warn">⚠️ Jeu responsable — Ces pronostics sont des aides à la décision. Jouez raisonnablement.</div>
+</div>
+
+<!-- ════════════════════════════════════════
+     ONGLET PARIS — Tiercé / Quarté+ / Quinté+ / Couplé / 2sur4
+════════════════════════════════════════ -->
+<div class="panel" id="panel-paris">
+  <div class="course-info" id="ciParis"></div>
+  <div class="sec">Pronostics par type de pari PMU</div>
+  <div class="info-box" style="border-color:rgba(0,212,255,.2);color:var(--cyan);">
+    🎫 Génère les combinaisons optimales pour chaque pari : <b>Tiercé, Quarté+, Quinté+, Couplé Gagnant/Placé, 2sur4</b> — avec ordre conseillé, variantes et mises.
+  </div>
+  <button class="btn btn-cyan" id="parisBtn" onclick="genererParis()">🎫 GÉNÉRER TOUS LES PARIS</button>
+  <div id="parisCont"><div class="empty"><div class="ei">🎫</div>Lancez d'abord Monte Carlo + IA, puis générez les paris</div></div>
+  <div class="warn">⚠️ Jeu responsable — Misez avec modération. Ces combinaisons sont indicatives.</div>
+</div>
+
+<!-- RÉSULTAT -->
+<div class="panel" id="panel-result">
+  <div class="course-info" id="ciResult"></div>
+  <div class="sec">Résultat officiel Quinté+</div>
+  <div class="info-box">
+    ✅ Saisissez l'arrivée officielle pour comparer avec le classement Fusion, l'ordre conseillé et les chevaux retenus.
+  </div>
+  <div class="date-input-row">
+    <input type="text" class="form-input" id="resultInput" value="10 1 2 9 6" placeholder="ex: 10 1 2 9 6" style="flex:1;">
+    <button onclick="evalResult()" style="padding:9px 14px;background:var(--bg3);border:1px solid var(--green);border-radius:8px;color:var(--green);font-family:'DM Sans',sans-serif;font-size:.75em;cursor:pointer;white-space:nowrap;">Comparer</button>
+  </div>
+  <div id="resultBox"><div class="empty"><div class="ei">✅</div>Entrez le résultat puis comparez.</div></div>
+</div>
+
+</div>
+<script>
+// ═══════════════════════════════════════════════════════
+// ÉTAT GLOBAL
+// ═══════════════════════════════════════════════════════
+let H=[], COURSE={}, METEO={}, mcOK=false, poiOK=false, iaOK=false, proOK=false, mcC={};
+let selectedDate=new Date();
+const SOURCE_LINKS=[
+  "https://www.pmu.fr",
+  "https://www.pmu.fr/turf/",
+  "https://www.pmu.fr/turf/quinte-du-jour/",
+  "https://www.pmu.fr/turf/faq/parier-avec-pmu-fr/comment-jouer-et-parier-sur-les-courses-de-chevaux/",
+  "https://www.pmu.fr/turf/faq/culture-des-courses-et-paris-hippiques/comment-gagner-au-e-quinte/",
+  "https://www.pmu.fr/turf/faq/culture-des-courses-et-paris-hippiques/quel-est-le-quinte-de-demain-pmu/",
+  "https://www.pmu.fr/point-de-vente/cote-courses/comment-parier-au-quinte/",
+  "https://www.pmu.fr/turf/cote-courses/calendrier-courses-hippiques/",
+  "https://www.youtube.com/watch?v=tzRojtlFcNg",
+  "https://github.com/nanaelie/open-pmu-api",
+  "https://open-pmu-api.vercel.app/api/arrivee",
+  "https://open-pmu-api.vercel.app/api/arrivees?date=05/05/2021",
+  "https://api.aspiturf.com/api",
+  "https://online.turfinfo.api.pmu.fr/rest/client/1/programme/25022022/",
+  "https://forum.aspiturf.com/d/67-api-turf-donn-es-des-courses-pmu",
+  "https://forum.aspiturf.com/d/64-r-cup-rer-info-m-t-o-api-pmu",
+  "https://www.turf-fr.com/pronostics-quinte",
+  "https://www.turf-fr.com/blog/le-pari-quinte-au-pmu/",
+  "https://www.zone-turf.fr/quinte/rapport/",
+  "https://www.zone-turf.fr/pronostics/",
+  "https://www.paris-turf.com/programme-courses/aujourdhui",
+  "https://www.paris-turf.com/cheval/api/833f5c563dc30dc37bccb4d29b989549",
+  "https://www.turfomania.fr/",
+  "https://m.turfomania.fr/quinte/index.php",
+  "https://www.canalturf.com/courses_quinte.php",
+  "https://www.outilturfiste.com/",
+  "https://www.outilturfiste.com/pronostics_presse_quinte.php",
+  "https://www.turfoo.fr/",
+  "https://www.france-turf.com/programme-courses-pmu_r20.html",
+  "https://www.geny.com/reunions-courses-pmu",
+  "https://www.equidia.fr/",
+  "https://www.letrot.com/",
+  "https://www.france-galop.com/fr",
+  "https://www.zeturf.fr/fr/course",
+  "https://play.google.com/store/apps/details?id=com.le.quinte.plus.amou.two&hl=fr_CA",
+  "https://bonus-malin.info/pmu-quinte-plus/"
+];
+function sourcePromptBlock(){
+  return SOURCE_LINKS.map((u,i)=>`${i+1}. ${u}`).join("\n");
+}
+
+// ═══════════════════════════════════════════════════════
+// DATE PICKER
+// ═══════════════════════════════════════════════════════
+function initDatePicker(){
+  const c=document.getElementById('dateBtns'), today=new Date();
+  const lbls=["Aujourd'hui","Demain","Dans 2j"];
+  c.innerHTML='';
+  for(let i=0;i<3;i++){
+    const d=new Date(today);d.setDate(today.getDate()+i);
+    const b=document.createElement('button');
+    b.className='date-btn'+(i===0?' sel':'');
+    b.textContent=lbls[i]+'\n'+d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
+    b.style.whiteSpace='pre-line';b.style.lineHeight='1.3';
+    const dc=new Date(d);
+    b.onclick=()=>{selectDate(dc);document.querySelectorAll('.date-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');};
+    c.appendChild(b);
+  }
+  document.getElementById('autoDate').value=today.toISOString().split('T')[0];
+  document.getElementById('f-date').value=today.toISOString().split('T')[0];
+  selectDate(today);
+}
+function selectDate(d){
+  selectedDate=new Date(d);
+  document.getElementById('selDateLbl').textContent='📅 '+selectedDate.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+function setCustomDate(){
+  const v=document.getElementById('autoDate').value;if(!v)return;
+  const d=new Date(v+'T12:00:00');selectDate(d);
+  document.querySelectorAll('.date-btn').forEach(b=>b.classList.remove('sel'));
+}
+const MEM_STORE={};
+function safeStoreGet(k){
+  try{
+    const ls=window.localStorage;
+    return ls?ls.getItem(k):(MEM_STORE[k]||"");
+  }catch(e){return MEM_STORE[k]||"";}
+}
+function safeStoreSet(k,v){
+  MEM_STORE[k]=v;
+  try{
+    const ls=window.localStorage;
+    if(ls) ls.setItem(k,v);
+  }catch(e){}
+}
+function safeStoreRemove(k){
+  delete MEM_STORE[k];
+  try{
+    const ls=window.localStorage;
+    if(ls) ls.removeItem(k);
+  }catch(e){}
+}
+function initApiKeyUI(){
+  const input=document.getElementById("apiKeyInput");
+  const status=document.getElementById("apiKeyStatus");
+  const proxyInput=document.getElementById("apiProxyInput");
+  const proxyStatus=document.getElementById("apiProxyStatus");
+  if(!input||!status) return;
+  const saved=safeStoreGet("anthropic_api_key")||"";
+  if(saved){
+    input.value=saved;
+    status.textContent=`Clé API ${apiProviderFromKey(saved).toUpperCase()} chargée depuis ce navigateur.`;
+    status.style.color="var(--green)";
+  }
+  input.addEventListener("input",()=>{
+    status.textContent="Cliquez sur Sauver pour mémoriser la nouvelle clé.";
+    status.style.color="var(--gold2)";
+  });
+  const savedProxy=safeStoreGet("openai_proxy_url")||"";
+  if(proxyInput&&proxyStatus&&savedProxy){
+    proxyInput.value=savedProxy;
+    proxyStatus.textContent="Proxy OpenAI chargé.";
+    proxyStatus.style.color="var(--cyan)";
+  }
+}
+function saveApiKey(){
+  const input=document.getElementById("apiKeyInput");
+  const status=document.getElementById("apiKeyStatus");
+  const key=(input?.value||"").trim();
+  if(!key){
+    safeStoreRemove("anthropic_api_key");
+    if(status){status.textContent="Clé supprimée. Collez une clé avant la recherche.";status.style.color="#ff9999";}
+    return;
+  }
+  safeStoreSet("anthropic_api_key",key);
+  if(status){status.textContent=`Clé API ${apiProviderFromKey(key).toUpperCase()} sauvegardée localement.`;status.style.color="var(--green)";}
+}
+function getApiKey(){
+  const fromInput=(document.getElementById("apiKeyInput")?.value||"").trim();
+  const saved=(safeStoreGet("anthropic_api_key")||"").trim();
+  const key=fromInput||saved;
+  if(key&&fromInput&&fromInput!==saved) safeStoreSet("anthropic_api_key",fromInput);
+  return key;
+}
+function saveApiProxy(){
+  const input=document.getElementById("apiProxyInput");
+  const status=document.getElementById("apiProxyStatus");
+  const url=(input?.value||"").trim();
+  if(!url){
+    safeStoreRemove("openai_proxy_url");
+    if(status){status.textContent="Proxy supprimé. Appel direct OpenAI utilisé.";status.style.color="var(--muted)";}
+    return;
+  }
+  if(!/^https:\/\//i.test(url)){
+    if(status){status.textContent="Le proxy doit commencer par https://";status.style.color="#ff9999";}
+    return;
+  }
+  safeStoreSet("openai_proxy_url",url);
+  if(status){status.textContent="Proxy OpenAI sauvegardé.";status.style.color="var(--cyan)";}
+}
+function getApiProxy(){
+  const fromInput=(document.getElementById("apiProxyInput")?.value||"").trim();
+  const saved=(safeStoreGet("openai_proxy_url")||"").trim();
+  const url=fromInput||saved;
+  if(url&&fromInput&&fromInput!==saved) safeStoreSet("openai_proxy_url",fromInput);
+  return url;
+}
+function apiProviderFromKey(key){
+  const k=String(key||"").trim();
+  if(k.startsWith("sk-ant-")) return "anthropic";
+  if(k.startsWith("sk-")) return "openai";
+  return "inconnu";
+}
+function extractOpenAIText(data){
+  if(data.output_text) return data.output_text.trim();
+  const chunks=[];
+  (data.output||[]).forEach(item=>{
+    if(item.type==="message"&&typeof item.content==="string") chunks.push(item.content);
+    if(item.type==="message"&&item.text) chunks.push(item.text);
+    (item.content||[]).forEach(c=>{
+      if(c.type==="output_text"&&c.text) chunks.push(c.text);
+      else if(c.type==="text"&&c.text) chunks.push(c.text);
+      else if(c.text) chunks.push(c.text);
+    });
+  });
+  return chunks.join("\n").trim();
+}
+function summarizeOpenAIResponse(data){
+  const types=(data.output||[]).map(item=>{
+    const c=(item.content||[]).map(x=>x.type).join(",");
+    return c?`${item.type}:${c}`:item.type;
+  }).join(" | ");
+  const reason=data.incomplete_details?.reason||data.status||"sans détail";
+  return `${reason}${types?` · sortie: ${types}`:""}`;
+}
+
+// ═══════════════════════════════════════════════════════
+// API HELPER
+// ═══════════════════════════════════════════════════════
+async function callAPI(messages, useWebSearch, maxTokens){
+  const apiKey=getApiKey();
+  if(!apiKey) throw new Error("Clé API manquante");
+  const provider=apiProviderFromKey(apiKey);
+
+  if(provider==="openai"){
+    const input=messages.map(m=>({role:m.role||"user",content:m.content||""}));
+    const body={
+      model:"gpt-4.1",
+      input,
+      max_output_tokens:maxTokens||1000,
+      text:{format:{type:"text"}}
+    };
+    if(useWebSearch) body.tools=[{type:"web_search"}];
+    const proxy=getApiProxy();
+    let res;
+    try{
+      res=await fetch(proxy||"https://api.openai.com/v1/responses",{
+        method:"POST",
+        headers: proxy?{"Content-Type":"application/json"}:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer "+apiKey.trim()
+        },
+        body:JSON.stringify(proxy?{apiKey:apiKey.trim(),body}:body)
+      });
+    }catch(e){
+      throw new Error(proxy?
+        `Connexion proxy impossible (${e.message}). Vérifiez l'URL du proxy HTTPS.`:
+        `Failed to fetch: appel direct OpenAI bloqué par Android/WebView/CORS. Ajoutez un proxy OpenAI HTTPS dans le champ Proxy.`);
+    }
+    const txt=await res.text();
+    let data={};
+    try{data=JSON.parse(txt);}catch(e){throw new Error(`Réponse OpenAI illisible (${res.status})`);}
+    if(!res.ok||data.error) throw new Error(data.error?.message||`Erreur OpenAI ${res.status}`);
+    const out=extractOpenAIText(data);
+    if(!out) throw new Error("Réponse OpenAI vide ("+summarizeOpenAIResponse(data)+")");
+    return out;
+  }
+
+  if(provider!=="anthropic")
+    throw new Error("Format de clé API non reconnu. Utilisez une clé OpenAI sk-... ou Anthropic sk-ant-...");
+
+  const body={model:"claude-sonnet-4-20250514",max_tokens:maxTokens||1000,messages};
+  if(useWebSearch) body.tools=[{"type":"web_search_20250305","name":"web_search"}];
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "x-api-key":apiKey.trim(),
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true"
+    },
+    body:JSON.stringify(body)
+  });
+  const txt=await res.text();
+  let data={};
+  try{data=JSON.parse(txt);}catch(e){throw new Error(`Réponse API illisible (${res.status})`);}
+  if(!res.ok||data.error) throw new Error(data.error?.message||`Erreur API ${res.status}`);
+  return (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+}
+
+function stripAccents(s){
+  return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+}
+function normHorseName(s){
+  return stripAccents(String(s||"").toUpperCase()).replace(/[^A-Z0-9]+/g," ").trim();
+}
+function clamp10(v,d=5){
+  const n=parseFloat(String(v??"").replace(",","."));
+  return Number.isFinite(n)?Math.max(0,Math.min(10,n)):d;
+}
+function coteToNum(v){
+  if(v===undefined||v===null||v==="") return undefined;
+  const s=String(v).replace(",",".").trim();
+  const frac=s.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/);
+  if(frac){
+    const a=parseFloat(frac[1]), b=parseFloat(frac[2]);
+    return b?Math.round((a/b)*100)/100:undefined;
+  }
+  const n=parseFloat(s.replace(/[^\d.]/g,""));
+  return Number.isFinite(n)?n:undefined;
+}
+function normalizePartant(p){
+  const num=parseInt(p?.num,10);
+  if(!Number.isFinite(num)) return null;
+  const cote=p?.cote||p?.odds||p?.rapport||"";
+  return {
+    num,
+    nom:String(p?.nom||p?.name||p?.cheval||`N°${num}`).trim(),
+    np:!!p?.np||/^(true|oui|np)$/i.test(String(p?.np||"")),
+    cote:cote||"?",
+    cote_num:p?.cote_num!==undefined?coteToNum(p.cote_num):coteToNum(cote),
+    sexe:p?.sexe||"?",
+    age:parseInt(p?.age,10)||0,
+    musique:p?.musique||"?",
+    gains:p?.gains||"?",
+    ratio_victoires:p?.ratio_victoires||p?.ratio||"?",
+    derniere_sortie:p?.derniere_sortie||p?.derniere||"",
+    ferrage:p?.ferrage||"",
+    driver:p?.driver||p?.jockey||"",
+    driver_stats:p?.driver_stats||"",
+    entraineur:p?.entraineur||p?.trainer||"",
+    consensus_presse:p?.consensus_presse||p?.consensus||"",
+    forme:clamp10(p?.forme,5),
+    forme_tendance:p?.forme_tendance||"",
+    presse:clamp10(p?.presse,5),
+    terrain:clamp10(p?.terrain,5),
+    meteo_avantage:clamp10(p?.meteo_avantage,5),
+    tendance_globale:p?.tendance_globale||"",
+    joker:!!p?.joker,
+    joker_raison:p?.joker_raison||"",
+    contexte:p?.contexte||""
+  };
+}
+function mergePartantLists(...lists){
+  const byNum=new Map();
+  lists.flat().filter(Boolean).forEach(raw=>{
+    const p=normalizePartant(raw);
+    if(!p) return;
+    const prev=byNum.get(p.num)||{};
+    const merged={...prev};
+    Object.keys(p).forEach(k=>{
+      const v=p[k], old=merged[k];
+      const empty=v===undefined||v===null||v===""||v==="?"||v===0;
+      const oldEmpty=old===undefined||old===null||old===""||old==="?"||old===0;
+      if(oldEmpty||(!empty&&String(v).length>String(old).length)) merged[k]=v;
+    });
+    if(prev.nom&&p.nom&&prev.nom.length>=p.nom.length) merged.nom=prev.nom;
+    byNum.set(p.num,merged);
+  });
+  return [...byNum.values()].sort((a,b)=>a.num-b.num);
+}
+function extractPartantsFromText(raw){
+  const partants=[];
+  const seen=new Set();
+  const text=String(raw||"").replace(/\r/g,"\n");
+
+  try{
+    const obj=parseTolerant(text);
+    if(Array.isArray(obj.partants)) return mergePartantLists(obj.partants);
+  }catch(e){}
+
+  text.split("\n").forEach(line=>{
+    let l=line.replace(/\s+/g," ").trim();
+    if(!l||/R\d+\s*C\d+/i.test(l)||/prix|hippodrome|distance|allocation/i.test(l)) return;
+    const m=l.match(/^(?:[-*]\s*)?(?:n[°o]?\s*)?(\d{1,2})\s*(?:[.)\-:|]\s+|\s+)(.{3,})$/i);
+    if(!m) return;
+    const num=parseInt(m[1],10);
+    if(num<1||num>30||seen.has(num)) return;
+    let rest=m[2].trim();
+    const np=/\b(?:NP|non\s*partant)\b/i.test(rest);
+    const coteM=rest.match(/\b(?:cote\s*)?(\d{1,3}(?:[,.]\d+)?\s*(?:\/\s*1)?)\b/i);
+    const cote=coteM?coteM[1].replace(/\s+/g,""):"?";
+    rest=rest
+      .replace(/\b(?:cote|pmu|odds)\s*[:=]?\s*\d{1,3}(?:[,.]\d+)?\s*(?:\/\s*1)?/ig," ")
+      .replace(/\b(?:corde|poids|driver|jockey|entraineur|entraîneur)\b.*$/i," ")
+      .replace(/\b(?:NP|non\s*partant)\b/ig," ")
+      .replace(/[·|;].*$/," ")
+      .trim();
+    const words=rest.split(" ").filter(Boolean);
+    if(words.length>7) rest=words.slice(0,7).join(" ");
+    if(rest.length<2) return;
+    seen.add(num);
+    partants.push(normalizePartant({num,nom:rest,cote,np}));
+  });
+  return mergePartantLists(partants);
+}
+function compactPartantsForPrompt(partants, fallbackText){
+  if(partants&&partants.length){
+    return partants.map(p=>`${p.num}. ${p.nom}${p.cote&&p.cote!=="?"?` (cote ${p.cote})`:""}${p.np?" NP":""}`).join("\n");
+  }
+  return String(fallbackText||"").substring(0,4500);
+}
+
+// ═══════════════════════════════════════════════════════
+// PARSER JSON TOLÉRANT — répare le JSON tronqué/incomplet
+// Niveau ultime : extraction champ par champ même si tout est cassé
+// ═══════════════════════════════════════════════════════
+function parseTolerant(raw){
+  let s = raw.replace(/```json|```/g,"").trim();
+  const start = s.indexOf("{");
+  if(start>0) s = s.substring(start);
+
+  // 1) Direct
+  try { return JSON.parse(s); } catch(e){}
+
+  // 2) Bloc {...}
+  const full = s.match(/\{[\s\S]*\}/);
+  if(full){ try { return JSON.parse(full[0]); } catch(e){} }
+
+  // 3) Fermeture auto des structures ouvertes (tronquage en fin)
+  try {
+    let depthC=0,depthB=0,inStr=false,esc=false,lastSafe=-1;
+    for(let i=0;i<s.length;i++){
+      const c=s[i];
+      if(esc){esc=false;continue;}
+      if(c==="\\"){esc=true;continue;}
+      if(c==='"'){inStr=!inStr;continue;}
+      if(inStr)continue;
+      if(c==="{")depthC++;else if(c==="}")depthC--;
+      else if(c==="[")depthB++;else if(c==="]")depthB--;
+      if((c==="}"||c==="]")) lastSafe=i;
+    }
+    if(lastSafe>0){
+      let body=s.substring(0,lastSafe+1).replace(/,\s*$/,"");
+      let dC=0,dB=0,iS=false,es=false;
+      for(let i=0;i<body.length;i++){
+        const c=body[i];
+        if(es){es=false;continue;}
+        if(c==="\\"){es=true;continue;}
+        if(c==='"'){iS=!iS;continue;}
+        if(iS)continue;
+        if(c==="{")dC++;else if(c==="}")dC--;else if(c==="[")dB++;else if(c==="]")dB--;
+      }
+      let fixed=body+"]".repeat(Math.max(0,dB))+"}".repeat(Math.max(0,dC));
+      try{ const o=JSON.parse(fixed); o._repaired=true; return o; }catch(e){}
+    }
+  } catch(e){}
+
+  // 4) Extraction robuste objet par objet (équilibrage des accolades)
+  try {
+    const partants=[];
+    const pStart=s.indexOf('"partants"');
+    const searchFrom = pStart>=0 ? s.indexOf("[",pStart) : 0;
+    let i=searchFrom;
+    while(i<s.length && i>=0){
+      const objStart=s.indexOf("{",i);
+      if(objStart<0)break;
+      // équilibrer
+      let depth=0,inStr=false,esc=false,objEnd=-1;
+      for(let j=objStart;j<s.length;j++){
+        const c=s[j];
+        if(esc){esc=false;continue;}
+        if(c==="\\"){esc=true;continue;}
+        if(c==='"'){inStr=!inStr;continue;}
+        if(inStr)continue;
+        if(c==="{")depth++;
+        else if(c==="}"){depth--;if(depth===0){objEnd=j;break;}}
+      }
+      if(objEnd<0)break; // objet tronqué → on s'arrête
+      const chunk=s.substring(objStart,objEnd+1);
+      if(chunk.includes('"num"')){
+        try{ const o=JSON.parse(chunk); if(o.num!==undefined)partants.push(o); }catch(e){}
+      }
+      i=objEnd+1;
+    }
+    if(partants.length>0){
+      let course={},meteo={};
+      const cM=s.match(/"course"\s*:\s*(\{[^}]*\})/);
+      if(cM){try{course=JSON.parse(cM[1]);}catch(e){}}
+      const mM=s.match(/"meteo"\s*:\s*(\{[^}]*\})/);
+      if(mM){try{meteo=JSON.parse(mM[1]);}catch(e){}}
+      return {trouve:true,course,meteo,partants,_repaired:true,note:"Données partiellement réparées"};
+    }
+  } catch(e){}
+
+  // 5) Dernier recours : extraire num+nom par regex simple
+  try {
+    const partants=[];
+    const re=/"num"\s*:\s*(\d+)\s*,\s*"nom"\s*:\s*"([^"]+)"/g;
+    let m;
+    while((m=re.exec(s))!==null){
+      partants.push({num:parseInt(m[1]),nom:m[2],presse:5,forme:5,terrain:5,np:false});
+    }
+    if(partants.length>0)
+      return {trouve:false,course:{},meteo:{},partants,_repaired:true,note:"Récupération minimale (num+nom). Ajustez les scores."};
+  } catch(e){}
+
+  throw new Error("JSON non parseable — réessayez ou utilisez Manuel");
+}
+
+// ═══════════════════════════════════════════════════════
+// PARSER GÉNÉRIQUE TOLÉRANT — pour IA scores & pronostics
+// Répare un JSON tronqué en fermant les structures ouvertes
+// ═══════════════════════════════════════════════════════
+function parseLenient(raw){
+  let s = raw.replace(/```json|```/g,"").trim();
+  const start = s.indexOf("{");
+  if(start>0) s = s.substring(start);
+
+  // 1) direct
+  try { return JSON.parse(s); } catch(e){}
+  // 2) bloc complet
+  const full = s.match(/\{[\s\S]*\}/);
+  if(full){ try { return JSON.parse(full[0]); } catch(e){} }
+
+  // 3) Réparation : fermer automatiquement les crochets/accolades manquants
+  let str = s;
+  // retirer une fin partielle après la dernière virgule/valeur complète
+  // compter les structures ouvertes en ignorant les strings
+  let depthC=0, depthB=0, inStr=false, esc=false, lastSafe=-1;
+  for(let i=0;i<str.length;i++){
+    const c=str[i];
+    if(esc){esc=false;continue;}
+    if(c==="\\"){esc=true;continue;}
+    if(c==='"'){inStr=!inStr;continue;}
+    if(inStr)continue;
+    if(c==="{")depthC++;
+    else if(c==="}"){depthC--;}
+    else if(c==="[")depthB++;
+    else if(c==="]"){depthB--;}
+    // position sûre = après une } ou ] ou valeur, hors string
+    if((c==="}"||c==="]") && depthC>=0 && depthB>=0) lastSafe=i;
+  }
+  // tronquer à la dernière position sûre puis fermer
+  if(lastSafe>0 && inStr===false){
+    let body=str.substring(0,lastSafe+1).replace(/,\s*$/,"");
+    // recompter ce qu'il faut fermer
+    let dC=0,dB=0,iS=false,es=false;
+    for(let i=0;i<body.length;i++){
+      const c=body[i];
+      if(es){es=false;continue;}
+      if(c==="\\"){es=true;continue;}
+      if(c==='"'){iS=!iS;continue;}
+      if(iS)continue;
+      if(c==="{")dC++;else if(c==="}")dC--;else if(c==="[")dB++;else if(c==="]")dB--;
+    }
+    let fixed=body + "]".repeat(Math.max(0,dB)) + "}".repeat(Math.max(0,dC));
+    try{ const o=JSON.parse(fixed); o._repaired=true; return o; }catch(e){}
+  }
+
+  // 4) extraction du tableau scores si présent
+  try {
+    const scores=[];
+    const re=/\{\s*"num"\s*:\s*(\d+)\s*,\s*"score"\s*:\s*([\d.]+)\s*\}/g;
+    let m;
+    while((m=re.exec(s))!==null) scores.push({num:parseInt(m[1]),score:parseFloat(m[2])});
+    if(scores.length>0){
+      const topM=s.match(/"ia_top5"\s*:\s*\[([\d,\s]+)\]/);
+      const top=topM?topM[1].split(",").map(x=>parseInt(x.trim())).filter(x=>!isNaN(x)):[];
+      const synM=s.match(/"synthese"\s*:\s*"([^"]*)"/);
+      return {scores, ia_top5:top, synthese:synM?synM[1]:"(synthèse tronquée)", _repaired:true};
+    }
+  } catch(e){}
+
+  throw new Error("JSON IA non parseable — réessayez");
+}
+
+function logAuto(t){document.getElementById('autoLog').textContent=t;}
+function appendLog(t){document.getElementById('autoLog').textContent+="\n"+t;}
+function setProg(p,t){document.getElementById('autoFill').style.width=p+'%';if(t)document.getElementById('autoTxt').textContent=t;}
+
+// ═══════════════════════════════════════════════════════════════════════
+// AUTO FETCH ENRICHI — 5 ÉTAPES
+//   1. Partants + cotes + course
+//   2. Musique + profils chevaux (sexe, âge, gains, ratio)
+//   3. Drivers + entraîneurs + stats
+//   4. Météo + état piste + stats hippodrome
+//   5. Synthèse JSON enrichie
+// ═══════════════════════════════════════════════════════════════════════
+async function runAutoFetch(){
+  const btn=document.getElementById("autoBtn");
+  btn.disabled=true; btn.textContent="⏳ Analyse complète...";
+  document.getElementById("autoProg").style.display="block";
+  document.getElementById("autoCur").style.display="inline";
+  document.getElementById("autoPreviewWrap").style.display="none";
+  document.getElementById("autoLog").className="auto-box load";
+  METEO={};
+
+  const dateStr=selectedDate.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const [yr,mo,dy]=selectedDate.toISOString().split("T")[0].split("-");
+  const dateFr=`${dy}/${mo}/${yr}`;
+
+  let rawCourse="", rawChevaux="", rawDrivers="", rawMeteo="", basePartants=[];
+
+  try{
+    // ════ ÉTAPE 1 : COURSE + PARTANTS + COTES ════
+    setProg(5,"🐴 1/5 — Partants & cotes...");
+    logAuto(`🔍 ÉTAPE 1/5 — Récupération partants Quinté+ du ${dateStr}\n🌐 Sources: PMU.fr, Geny, ZoneTurf, Canalturf...`);
+
+    rawCourse = await callAPI([{role:"user",content:
+      `Recherche sur PLUSIEURS sites le Quinté+ PMU du ${dateFr}. `+
+      `Consulte et croise : pmu.fr, geny.com, zone-turf.fr, canalturf.com, turfomania.fr, paris-turf.com, equidia.fr, letrot.com. `+
+      `Si un site n'a pas l'info, essaie le suivant.\n\n`+
+      `SOURCES/API COMPLÉMENTAIRES À EXPLOITER EN PRIORITÉ SI DISPONIBLES:\n${sourcePromptBlock()}\n\n`+
+      `Fournis IMPÉRATIVEMENT :\n`+
+      `- Nom exact du Prix, hippodrome, ville, heure départ, distance, type de piste, discipline, allocation, n° réunion/course (RxCx)\n`+
+      `- Liste complète numérotée de TOUS les partants : N°, NOM exact, COTE PMU (ex: 5/1 ou 12.5), n° corde ou poids\n`+
+      `- Synthèse presse/consensus si disponible : Geny, Canalturf, Turfomania, Turfoo, OutilTurfiste, Paris-Turf, Zone-Turf, ZEturf\n`+
+      `- Pour chaque cheval : nombre de citations dans les pronostics presse, position moyenne approximative, base/tocard éventuel\n`+
+      `- Non Partants éventuels\n`+
+      `Sois précis et exhaustif. Indique la/les source(s) utilisée(s). Réponse en texte clair.`
+    }], true, 3500);
+
+    basePartants = extractPartantsFromText(rawCourse);
+    const partantsPrompt = compactPartantsForPrompt(basePartants, rawCourse);
+
+    setProg(22,"✅ Course récupérée");
+    appendLog(`\n✅ Course & partants : ${basePartants.length||"?"} détectés\n${rawCourse.substring(0,500)}...`);
+
+    // ════ ÉTAPE 2 : PROFILS CHEVAUX (musique, sexe, âge, gains) ════
+    setProg(26,"🐎 2/5 — Profils chevaux...");
+    appendLog(`\n\n🐎 ÉTAPE 2/5 — Recherche profils des chevaux (musique, sexe, âge, gains)...`);
+
+    rawChevaux = await callAPI([{role:"user",content:
+      `Pour les chevaux du Quinté+ du ${dateFr} (liste de référence ci-dessous):\n${partantsPrompt}\n\n`+
+      `Pour chaque cheval, recherche et donne (en 1-2 lignes par cheval):\n`+
+      `- MUSIQUE des 5-6 dernières courses (ex: 1a3a5a2aDa)\n`+
+      `- Sexe (H=hongre, M=mâle, F=femelle) et ÂGE en années\n`+
+      `- Gains totaux carrière (en €)\n`+
+      `- Ratio victoires (% sur le total des courses)\n`+
+      `- Dernière sortie (date, position, hippodrome)\n`+
+      `- Forme du moment (en hausse / en baisse / stable)\n`+
+      `- Adéquation terrain (préfère lourd/souple/bon/sec)\n`+
+      `- Ferré ou déferré pour la course du jour si connu\n`+
+      `Sois concis et factuel.\n`+
+      `Important: traite TOUS les numéros de la liste, sans en oublier.`
+    }], true, 4500);
+
+    setProg(48,"✅ Profils chevaux OK");
+    appendLog(`\n✅ Profils:\n${rawChevaux.substring(0,300)}...`);
+
+    // ════ ÉTAPE 3 : DRIVERS + ENTRAÎNEURS ════
+    setProg(52,"🏇 3/5 — Drivers & entraîneurs...");
+    appendLog(`\n\n🏇 ÉTAPE 3/5 — Recherche drivers, jockeys, entraîneurs...`);
+
+    rawDrivers = await callAPI([{role:"user",content:
+      `Pour les chevaux du Quinté+ du ${dateFr}:\n${partantsPrompt}\n\n`+
+      `Pour chaque cheval, recherche :\n`+
+      `- Driver / Jockey (nom complet)\n`+
+      `- Entraîneur (nom complet)\n`+
+      `- Réussite récente du driver (% victoires sur 30 derniers jours si possible)\n`+
+      `- Association driver-cheval (déjà collaboré? avec quel résultat?)\n`+
+      `- Driver suspendu ou changement récent ?\n`+
+      `Réponse compacte, format texte. Ne saute aucun numéro de la liste.`
+    }], true, 3200);
+
+    setProg(68,"✅ Drivers OK");
+    appendLog(`\n✅ Drivers:\n${rawDrivers.substring(0,250)}...`);
+
+    // ════ ÉTAPE 4 : MÉTÉO + STATS HIPPODROME ════
+    setProg(72,"🌦️ 4/5 — Météo & stats hippodrome...");
+
+    const villeMatch=rawCourse.match(/(vincennes|paris|enghien|lyon-?la-?soie|cagnes-?sur-?mer|deauville|longchamp|saint-?cloud|chantilly|auteuil|la roche-?sur-?yon|bordeaux|toulouse|marseille|nancy|strasbourg|reims|graignes|argentan|le mont-?saint-?michel|le croisé|laval|caen|amiens|maisons-?laffitte|pornichet)/i);
+    const ville=villeMatch?villeMatch[1]:"hippodrome France";
+    appendLog(`\n\n🌦️ ÉTAPE 4/5 — Météo & stats ${ville}...`);
+
+    rawMeteo = await callAPI([{role:"user",content:
+      `1) Météo à ${ville} (France) le ${dateFr} en soirée vers 19h-22h: température, conditions (soleil/nuageux/pluie/brouillard), vent km/h, humidité %, risque pluie %, visibilité.\n`+
+      `2) Quel impact attendu sur la piste (lourde/souple/bonne/sèche) et avantage tactique (chevaux déferrés vs ferrés, vitesse vs résistance, position de corde) ?\n`+
+      `3) Statistiques récentes hippodrome ${ville}: les chevaux gagnent plutôt depuis quelle position (corde basse, milieu, extérieur) sur cette distance ? Tendance des arrivées récentes.\n`+
+      `Réponse concise.`
+    }], true, 1200);
+
+    setProg(85,"✅ Météo OK");
+    appendLog(`\n✅ Météo & stats:\n${rawMeteo.substring(0,250)}...`);
+
+    // ════ ÉTAPE 5 : SYNTHÈSE JSON FINALE ════
+    setProg(88,"⚙️ 5/5 — Synthèse JSON...");
+    appendLog(`\n\n⚙️ ÉTAPE 5/5 — Fusion en JSON structuré...`);
+
+    const finalPrompt=
+      `Données collectées sur le Quinté+ du ${dateStr}:\n\n`+
+      `=== SOURCES/API DISPONIBLES ===\n${sourcePromptBlock()}\n\n`+
+      `=== PARTANTS DE RÉFÉRENCE À CONSERVER OBLIGATOIREMENT (${basePartants.length||"nombre inconnu"}) ===\n${partantsPrompt}\n\n`+
+      `=== COURSE & PARTANTS ===\n${rawCourse}\n\n`+
+      `=== PROFILS CHEVAUX ===\n${rawChevaux}\n\n`+
+      `=== DRIVERS & ENTRAÎNEURS ===\n${rawDrivers}\n\n`+
+      `=== MÉTÉO & STATS HIPPODROME ===\n${rawMeteo}\n\n`+
+      `Synthétise TOUT en JSON strict (rien d'autre, sans markdown):\n`+
+      `{\n`+
+      `  "trouve":true,\n`+
+      `  "course":{"prix":"...","hippodrome":"...","ville":"...","heure":"HH:MM","distance":"XXXXm","discipline":"...","allocation":"...","piste_type":"grande piste/petite/sable","piste_etat":"bonne/souple/lourde","num_course":"R1C5"},\n`+
+      `  "meteo":{"temp":"X°C","conditions":"...","vent":"Xkm/h","humidite":"X%","pluie_risque":"X%","visibilite":"bonne","impact_piste":"...","resume":"1 phrase"},\n`+
+      `  "stats_hippo":{"position_favorable":"corde basse/milieu/ext","tendance":"..."},\n`+
+      `  "partants":[\n`+
+      `    {\n`+
+      `      "num":1,"nom":"...","np":false,\n`+
+      `      "cote":"5/1","cote_num":5.0,\n`+
+      `      "sexe":"M","age":7,"musique":"1a3a5a2aDa",\n`+
+      `      "gains":"294860€","ratio_victoires":"22%",\n`+
+      `      "derniere_sortie":"date - position - hippodrome",\n`+
+      `      "ferrage":"déferré/ferré/4P déferré",\n`+
+      `      "driver":"...","driver_stats":"X% victoires 30j",\n`+
+      `      "entraineur":"...",\n`+
+      `      "forme":7,"forme_tendance":"hausse/stable/baisse",\n`+
+      `      "presse":7,"terrain":8,"meteo_avantage":7,\n`+
+      `      "consensus_presse":"cité par X sources, rang moyen Y, base/tocard/neutre",\n`+
+      `      "tendance_globale":"...",\n`+
+      `      "joker":false,"joker_raison":"",\n`+
+      `      "contexte":"1 phrase synthèse"\n`+
+      `    }\n`+
+      `  ],\n`+
+      `  "joker_principal":{"num":X,"nom":"...","raison":"..."},\n`+
+      `  "np_list":"N°X","source":"web","note":"..."\n`+
+      `}\n\n`+
+      `RÈGLES STRICTES:\n`+
+      `- Le tableau "partants" doit contenir EXACTEMENT tous les numéros de la liste de référence ci-dessus, dans l'ordre, même si certaines infos manquent\n`+
+      `- Si une information est introuvable, mets "?" mais garde le cheval\n`+
+      `- JSON COMPLET et VALIDE obligatoire (ferme bien tous les crochets et accolades)\n`+
+      `- Garde "contexte" TRÈS court (max 8 mots) pour ne pas dépasser la limite\n`+
+      `- forme/presse/terrain/meteo_avantage sur 10\n`+
+      `- presse doit être calculé depuis le consensus multi-sources quand disponible\n`+
+      `- cote_num = décimal (5/1 → 5.0)\n`+
+      `- musique exacte si trouvée sinon "?"\n`+
+      `- joker=true si cheval sous-coté à fort potentiel\n`+
+      `- Termine TOUJOURS le JSON proprement même si tu dois raccourcir les textes`;
+
+    const jsonTxt = await callAPI([{role:"user",content:finalPrompt}], false, 8000);
+
+    setProg(94,"🔍 Parsing...");
+    const parsed = parseTolerant(jsonTxt);
+    parsed.partants = mergePartantLists(basePartants, parsed.partants||[]);
+
+    if(!parsed.partants||parsed.partants.length===0)
+      throw new Error("Aucun partant trouvé — course peut-être pas encore publiée");
+
+    if(basePartants.length && parsed.partants.length<basePartants.length)
+      appendLog(`\n⚠️ Certains détails manquent, mais la liste complète détectée à l'étape 1 a été conservée (${parsed.partants.length}/${basePartants.length}).`);
+
+    if(parsed._repaired)
+      appendLog(`\n⚠️ JSON tronqué — réparé auto (${parsed.partants.length} partants récupérés)`);
+
+    METEO = parsed.meteo||{};
+    COURSE = {
+      prix:parsed.course?.prix||"Quinté+",
+      hippo:parsed.course?.hippodrome||"?",
+      ville:parsed.course?.ville||ville,
+      heure:parsed.course?.heure||"?",
+      dist:parsed.course?.distance||"?",
+      discipline:parsed.course?.discipline||"Trot Attelé",
+      alloc:parsed.course?.allocation||"?",
+      piste:parsed.course?.piste_etat||"?",
+      piste_type:parsed.course?.piste_type||"?",
+      num_course:parsed.course?.num_course||"?",
+      stats_hippo:parsed.stats_hippo||{},
+      date:dateStr
+    };
+
+    setProg(98,"✅ Affichage...");
+    document.getElementById("autoLog").className="auto-box ok";
+    logAuto(
+      `✅ Récupération enrichie complète (5/5)\n\n`+
+      `📍 ${COURSE.prix} — ${COURSE.hippo} ${COURSE.num_course?`(${COURSE.num_course})`:''}\n`+
+      `⏰ ${COURSE.heure} · ${COURSE.dist} · ${COURSE.discipline}\n`+
+      `🛣️ Piste: ${COURSE.piste_type} (${COURSE.piste})\n`+
+      `🌦️ ${METEO.conditions||"?"} ${METEO.temp||""} · Vent ${METEO.vent||"?"} · Pluie ${METEO.pluie_risque||"?"}\n`+
+      `   Impact: ${METEO.impact_piste||"?"}\n`+
+      `🐴 ${parsed.partants.length} partants analysés en détail\n`+
+      `🚫 NP: ${parsed.np_list||"aucun"}\n`+
+      `🃏 Joker: N°${parsed.joker_principal?.num||"?"} ${parsed.joker_principal?.nom||""}\n`+
+      `   ${parsed.joker_principal?.raison||""}\n`+
+      `📝 ${parsed.note||""}`
+    );
+
+    renderAutoPreview(parsed.partants, parsed.joker_principal);
+    document.getElementById("autoPreviewWrap").style.display="block";
+
+  }catch(err){
+    document.getElementById("autoLog").className="auto-box err";
+    const apiErr=/clé|api|openai|anthropic|x-api-key|authorization|quota|billing|rate|401|403|429|fetch/i.test(err.message||"");
+    logAuto(`❌ ${err.message}\n\n💡 Solutions:\n${apiErr?`• Vérifiez la clé API collée dans le champ\n• OpenAI: clé sk-... ou sk-proj-...\n• Anthropic: clé sk-ant-...\n• Vérifiez crédit/billing et droits Web Search`: `• Course pas encore publiée\n• Essayez J-1/J+1\n• Utilisez "Manuel"`}`);
+  }
+
+  setProg(100,"");
+  setTimeout(()=>document.getElementById("autoProg").style.display="none",800);
+  document.getElementById("autoCur").style.display="none";
+  btn.disabled=false; btn.textContent="🔄 Relancer";
+}
+
+// ═══════════════════════════════════════════════════════
+// PREVIEW ENRICHIE
+// ═══════════════════════════════════════════════════════
+function renderAutoPreview(partants, joker){
+  // Météo box
+  let meteoH="";
+  if(METEO.resume||METEO.conditions){
+    meteoH=`<div class="meteo-card">
+      <div style="font-size:.65em;color:var(--cyan);font-weight:600;letter-spacing:1px;margin-bottom:8px;">🌦️ MÉTÉO HIPPODROME ${COURSE.ville?'· '+COURSE.ville:''}</div>
+      <div class="meteo-grid">
+        <div class="meteo-cell"><div class="meteo-icon">🌡️</div><div class="meteo-val">${METEO.temp||"?"}</div><div class="meteo-lbl">Temp</div></div>
+        <div class="meteo-cell"><div class="meteo-icon">☁️</div><div class="meteo-val" style="font-size:.7em;">${METEO.conditions?METEO.conditions.substring(0,12):"?"}</div><div class="meteo-lbl">Ciel</div></div>
+        <div class="meteo-cell"><div class="meteo-icon">💨</div><div class="meteo-val">${METEO.vent||"?"}</div><div class="meteo-lbl">Vent</div></div>
+        <div class="meteo-cell"><div class="meteo-icon">💧</div><div class="meteo-val">${METEO.pluie_risque||"?"}</div><div class="meteo-lbl">Pluie</div></div>
+      </div>
+      <div class="meteo-impact">
+        🎯 Piste: <b>${COURSE.piste_type||"?"} · ${COURSE.piste||"?"}</b><br>
+        ${METEO.impact_piste?'<br>'+METEO.impact_piste:''}
+        ${COURSE.stats_hippo?.tendance?'<br><br>📊 Stats: '+COURSE.stats_hippo.tendance:''}
+      </div>
+    </div>`;
+  }
+
+  // Joker box
+  if(joker&&joker.num){
+    meteoH+=`<div style="background:linear-gradient(135deg,rgba(155,89,255,.08),rgba(155,89,255,.02));border:1px solid rgba(155,89,255,.3);border-radius:11px;padding:10px 12px;margin-bottom:10px;font-size:.74em;line-height:1.6;">
+      <div style="color:var(--purple);font-weight:600;margin-bottom:3px;">🃏 JOKER DU JOUR — N°${joker.num} ${joker.nom||''}</div>
+      <div style="color:var(--muted);">${joker.raison||""}</div>
+    </div>`;
+  }
+
+  document.getElementById("autoMeteoBox").innerHTML=meteoH;
+
+  // Cards partants enrichies
+  let html="";
+  partants.forEach(p=>{
+    const isNP=p.np||false, isJoker=p.joker||false;
+    const cls = isNP?'np':isJoker?'joker':'';
+    html+=`<div class="part-card ${cls}">
+      <div class="pc-head">
+        <div class="pc-num">${p.num}</div>
+        <div class="pc-nom">${p.nom||"?"}</div>
+        ${p.cote?`<div class="pc-cote">${p.cote}</div>`:''}
+        ${isJoker?'<div class="pc-tag tag-joker">🃏 JOKER</div>':''}
+        ${isNP?'<div class="pc-tag tag-np">NP</div>':''}
+      </div>
+      ${!isNP?`
+        <div class="pc-info">
+          ${p.sexe||p.age?`<b>${p.sexe||"?"}${p.age?'/'+p.age+' ans':''}</b> · `:''}
+          ${p.gains?'💰 '+p.gains:''}
+          ${p.ratio_victoires?' · 🏆 '+p.ratio_victoires:''}
+          ${p.ferrage?' · 🔩 '+p.ferrage:''}
+        </div>
+        ${p.musique?`<div class="pc-musique">🎵 ${p.musique}</div>`:''}
+        <div class="pc-info" style="margin-top:5px;">
+          ${p.driver?`🏇 <b>${p.driver}</b>`:''}
+          ${p.driver_stats?' ('+p.driver_stats+')':''}
+          ${p.entraineur?'<br>👤 Entr: '+p.entraineur:''}
+        </div>
+        ${p.derniere_sortie?`<div class="pc-info" style="font-style:italic;">📅 ${p.derniere_sortie}</div>`:''}
+        ${p.consensus_presse?`<div class="pc-info">📰 <b>Consensus:</b> ${p.consensus_presse}</div>`:''}
+        ${p.forme_tendance?`<div class="pc-info"><b>Forme: ${p.forme_tendance}</b> ${p.tendance_globale?'· '+p.tendance_globale:''}</div>`:''}
+        <div class="pc-stats">
+          <div class="pc-stat"><div class="pc-sval"><input type="number" id="ap-pts-${p.num}" value="${p.presse||5}" min="0" max="10" step="1"></div><div class="pc-slbl">Presse</div></div>
+          <div class="pc-stat"><div class="pc-sval"><input type="number" id="ap-fo-${p.num}" value="${p.forme||5}" min="0" max="10" step="0.5"></div><div class="pc-slbl">Forme</div></div>
+          <div class="pc-stat"><div class="pc-sval"><input type="number" id="ap-te-${p.num}" value="${p.terrain||5}" min="0" max="10" step="0.5"></div><div class="pc-slbl">Terrain</div></div>
+        </div>
+        ${p.contexte?`<div class="pc-ctx">💡 ${p.contexte}</div>`:''}
+        ${p.joker_raison?`<div class="pc-ctx" style="color:var(--purple);">🃏 ${p.joker_raison}</div>`:''}
+      `:''}
+    </div>`;
+  });
+  document.getElementById("autoPreview").innerHTML=html;
+  document.getElementById("autoPreview").dataset.partants=JSON.stringify(partants);
+}
+
+// ═══════════════════════════════════════════════════════
+// VALIDATE AUTO
+// ═══════════════════════════════════════════════════════
+function validateAutoData(){
+  const partants=JSON.parse(document.getElementById("autoPreview").dataset.partants||"[]");
+  H=[];
+  partants.forEach(p=>{
+    if(p.np) return;
+    H.push({
+      num:p.num, nom:p.nom||"?", sh:(p.nom||"?").split(" ")[0].substring(0,10),
+      pts: parseFloat(document.getElementById("ap-pts-"+p.num)?.value||p.presse||5),
+      fo:  parseFloat(document.getElementById("ap-fo-"+p.num)?.value||p.forme||5),
+      te:  parseFloat(document.getElementById("ap-te-"+p.num)?.value||p.terrain||5),
+      // données enrichies
+      cote: p.cote||"?",
+      cote_num: p.cote_num||10,
+      sexe: p.sexe||"?",
+      age: p.age||0,
+      musique: p.musique||"?",
+      gains: p.gains||"?",
+      ratio: p.ratio_victoires||"?",
+      derniere: p.derniere_sortie||"",
+      ferrage: p.ferrage||"",
+      driver: p.driver||"",
+      driver_stats: p.driver_stats||"",
+      entraineur: p.entraineur||"",
+      consensus: p.consensus_presse||"",
+      forme_tend: p.forme_tendance||"",
+      joker: p.joker||false,
+      joker_raison: p.joker_raison||"",
+      meteo_av: p.meteo_avantage||5,
+      contexte: p.contexte||"",
+      tendance: p.tendance_globale||"",
+      iaN:0,iaS:0,mN:0,mP:0,pN:0,pT:0,fN:0,pr:0,sc:0,fu:0
+    });
+  });
+  if(H.length<4){alert("Pas assez de partants valides.");return;}
+  document.getElementById('s-data').textContent='✓ Riche';
+  startAnalysis();
+}
+
+// ═══════════════════════════════════════════════════════
+// SAISIE MANUELLE
+// ═══════════════════════════════════════════════════════
+function initTable(){const t=document.getElementById('horsesBody');t.innerHTML='';for(let i=1;i<=16;i++)addRow(i);}
+function addRow(num){
+  const t=document.getElementById('horsesBody');
+  const n=num||t.rows.length+1;
+  const tr=document.createElement('tr');tr.id='row-'+n;
+  tr.innerHTML=`<td class="num-cell">${n}</td><td><input type="text" placeholder="Cheval ${n}" id="nom-${n}"></td><td><input type="number" min="0" max="10" step="1" value="3" id="pts-${n}" style="width:40px"></td><td><input type="number" min="0" max="10" step="0.5" value="5" id="fo-${n}" style="width:40px"></td><td><input type="number" min="0" max="10" step="0.5" value="5" id="te-${n}" style="width:40px"></td><td><input type="checkbox" class="np-toggle" id="np-${n}" onchange="toggleNP(${n})"></td>`;
+  t.appendChild(tr);
+}
+function addHorse(){const n=document.getElementById('horsesBody').rows.length+1;if(n>20)return;addRow(n);}
+function removeLastHorse(){const t=document.getElementById('horsesBody');if(t.rows.length>4)t.deleteRow(t.rows.length-1);}
+function toggleNP(n){
+  const isNP=document.getElementById('np-'+n).checked;
+  document.getElementById('row-'+n).querySelectorAll('input[type="text"],input[type="number"]').forEach(i=>{i.classList.toggle('np-input',isNP);i.disabled=isNP;});
+}
+function validateManualData(){
+  const prix=document.getElementById('f-prix').value.trim();
+  const hippo=document.getElementById('f-hippo').value.trim();
+  const dist=document.getElementById('f-dist').value.trim();
+  if(!prix||!hippo||!dist){alert('Remplissez : nom, hippodrome, distance.');return;}
+  COURSE={prix,hippo,dist,
+    discipline:document.getElementById('f-disc').value,
+    alloc:document.getElementById('f-alloc').value,
+    heure:document.getElementById('f-heure').value,
+    date:document.getElementById('f-date').value?new Date(document.getElementById('f-date').value).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):''};
+  const tbody=document.getElementById('horsesBody');H=[];
+  for(let r=0;r<tbody.rows.length;r++){
+    const i=r+1;
+    const nom=(document.getElementById('nom-'+i)||{}).value?.trim();
+    const np=(document.getElementById('np-'+i)||{}).checked;
+    if(np||!nom)continue;
+    H.push({num:i,nom,sh:nom.split(' ')[0].substring(0,10),
+      pts:parseFloat(document.getElementById('pts-'+i).value)||3,
+      fo:parseFloat(document.getElementById('fo-'+i).value)||5,
+      te:parseFloat(document.getElementById('te-'+i).value)||5,
+      cote:"?",cote_num:10,sexe:"?",age:0,musique:"?",gains:"?",ratio:"?",derniere:"",ferrage:"",driver:"",driver_stats:"",entraineur:"",consensus:"",forme_tend:"",joker:false,joker_raison:"",meteo_av:5,contexte:"",tendance:"",
+      iaN:0,iaS:0,mN:0,mP:0,pN:0,pT:0,fN:0,pr:0,sc:0,fu:0});
+  }
+  if(H.length<4){alert('Min 4 partants.');return;}
+  document.getElementById('s-data').textContent='Manuel';
+  startAnalysis();
+}
+
+// ═══════════════════════════════════════════════════════
+// START ANALYSIS
+// ═══════════════════════════════════════════════════════
+function startAnalysis(){
+  mcOK=false;poiOK=false;iaOK=false;proOK=false;mcC={};
+  document.getElementById('s-part').textContent=H.length;
+  document.getElementById('s-sim').textContent='–';
+  document.getElementById('s-meth').textContent='0/3';
+  ['mcCard','poiCard','iaScores','fusCard','pronoCont'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.innerHTML='<div class="empty"><div class="ei">⏳</div>Prêt à lancer</div>';
+  });
+  document.getElementById('iaResp').className='ia-box load';
+  document.getElementById('iaResp').textContent='Lancer l\'IA.';
+  document.getElementById('pronoLog').className='prono-log load';
+  document.getElementById('pronoLog').textContent='Générez les pronostics.';
+  if(document.getElementById('techLog')){
+    document.getElementById('techLog').className='auto-box load';
+    document.getElementById('techLog').textContent='Analyse complémentaire : engagement, profil piste-distance, régularité, driver, météo, risques, value bet.';
+    document.getElementById('techList').innerHTML='';
+    document.getElementById('techBtn').disabled=false;
+    document.getElementById('techBtn').textContent='🔬 LANCER MÉTHODE TECHNIQUE';
+  }
+  calcBase();
+  document.getElementById('hdrSub').textContent=(COURSE.prix||'Quinté+')+' · '+(COURSE.hippo||'?')+' · '+(COURSE.heure||'');
+  const pills=`<div class="ci-pill"><b>${COURSE.prix||'?'}</b></div><div class="ci-pill"><b>${COURSE.hippo||'?'}</b></div><div class="ci-pill">${COURSE.dist||'?'}</div><div class="ci-pill">${COURSE.discipline||'?'}</div>${COURSE.heure?`<div class="ci-pill"><b>${COURSE.heure}</b></div>`:''}${COURSE.piste?`<div class="ci-pill">Piste: ${COURSE.piste}</div>`:''}${METEO.conditions?`<div class="ci-pill weather">🌦️ ${METEO.conditions.substring(0,15)} ${METEO.temp||""}</div>`:''}<div class="ci-pill"><b>${H.length}</b> partants</div>${H.filter(h=>h.joker).length?`<div class="ci-pill joker">🃏 ${H.filter(h=>h.joker).length} joker(s)</div>`:''}`;
+  ['MC','POI','IA','FUS','PRO','Detail','Paris','Analyse','Result'].forEach(id=>{const el=document.getElementById('ci'+id);if(el)el.innerHTML=pills;});
+  updSteps();
+  renderDetail();
+  renderAnalyse();
+  sw('detail');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER FICHE DÉTAILLÉE
+// ═══════════════════════════════════════════════════════
+function renderDetail(){
+  if(H.length===0){document.getElementById('detailList').innerHTML='<div class="empty"><div class="ei">📋</div>Validez d\'abord les partants</div>';return;}
+  const sorted=[...H].sort((a,b)=>(a.cote_num||99)-(b.cote_num||99));
+  let html='';
+  sorted.forEach((h,i)=>{
+    const cls=(i<5?'t5':'')+' '+(h.joker?'joker':'');
+    html+=`<div class="detail-h ${cls}">
+      <div class="dh-head">
+        <div class="dh-num">${h.num}</div>
+        <div class="dh-name">${h.nom}${h.joker?' <span style="font-size:.62em;background:rgba(155,89,255,.2);color:var(--purple);border-radius:4px;padding:1px 5px;margin-left:4px;">🃏</span>':''}</div>
+        ${h.cote&&h.cote!=="?"?`<div class="dh-cote">${h.cote}</div>`:''}
+      </div>
+      <div class="dh-grid">
+        ${h.sexe!=="?"||h.age?`<div class="dh-cell"><div class="lbl">Profil</div><div class="val">${h.sexe||"?"}${h.age?'/'+h.age+' ans':''}</div></div>`:''}
+        ${h.gains&&h.gains!=="?"?`<div class="dh-cell"><div class="lbl">💰 Gains</div><div class="val">${h.gains}</div></div>`:''}
+        ${h.ratio&&h.ratio!=="?"?`<div class="dh-cell"><div class="lbl">🏆 Ratio victoires</div><div class="val">${h.ratio}</div></div>`:''}
+        ${h.ferrage?`<div class="dh-cell"><div class="lbl">🔩 Ferrage</div><div class="val">${h.ferrage}</div></div>`:''}
+        ${h.driver?`<div class="dh-cell"><div class="lbl">🏇 Driver</div><div class="val">${h.driver}${h.driver_stats?' <span style="color:var(--muted);font-size:.85em;">('+h.driver_stats+')</span>':''}</div></div>`:''}
+        ${h.entraineur?`<div class="dh-cell"><div class="lbl">👤 Entraîneur</div><div class="val">${h.entraineur}</div></div>`:''}
+        ${h.forme_tend?`<div class="dh-cell"><div class="lbl">📈 Forme</div><div class="val">${h.forme_tend}</div></div>`:''}
+        <div class="dh-cell"><div class="lbl">🌦️ Météo avantage</div><div class="val">${h.meteo_av||5}/10</div></div>
+      </div>
+      ${h.musique&&h.musique!=="?"?`<div class="dh-musique">🎵 ${h.musique}</div>`:''}
+      ${h.derniere?`<div class="dh-perf"><b>📅 Dernière sortie:</b> ${h.derniere}</div>`:''}
+      ${h.consensus?`<div class="dh-perf"><b>📰 Consensus presse:</b> ${h.consensus}</div>`:''}
+      ${h.contexte?`<div class="dh-perf" style="color:var(--text);">💡 ${h.contexte}</div>`:''}
+      ${h.joker_raison?`<div class="dh-perf" style="color:var(--purple);">🃏 ${h.joker_raison}</div>`:''}
+    </div>`;
+  });
+  document.getElementById('detailList').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════
+// MOTEUR DE SCORING MULTICRITÈRE — pondérations adaptatives par type de course
+// Chaque composante est calculée et stockée séparément (feature importance)
+// ═══════════════════════════════════════════════════════
+
+// Pondérations selon discipline (somme = 1.0)
+function getWeights(){
+  const d=(COURSE.discipline||'').toLowerCase();
+  const isHandicap=(COURSE.prix||'').toLowerCase().includes('handicap');
+  // Base
+  let w={presse:0.30, forme:0.22, terrain:0.13, cote:0.12, driver:0.09, musique:0.07, meteo:0.07};
+  if(d.includes('trot')){
+    // Trot : driver et régularité (musique) comptent plus, terrain moins
+    w={presse:0.28, forme:0.22, terrain:0.10, cote:0.12, driver:0.13, musique:0.09, meteo:0.06};
+  } else if(d.includes('plat')){
+    // Plat : cote/marché et forme priment, terrain important
+    w={presse:0.27, forme:0.23, terrain:0.15, cote:0.14, driver:0.08, musique:0.06, meteo:0.07};
+  } else if(d.includes('obstacle')){
+    // Obstacle : forme, expérience (musique), terrain (lourd fréquent)
+    w={presse:0.26, forme:0.24, terrain:0.16, cote:0.11, driver:0.08, musique:0.09, meteo:0.06};
+  }
+  if(isHandicap){ // handicap : la cote/marché est plus informative
+    w.cote+=0.04; w.presse-=0.04;
+  }
+  return w;
+}
+
+// Convertir une musique en score régularité 0-10
+// (chiffres = positions, lettres D/A/T = disqualifié/arrêté = pénalité)
+function musiqueScore(mus){
+  if(!mus||mus==="?") return 5;
+  const items=mus.match(/(\d+|[DATRdatr])[aAmMpPhHcC]?/g)||[];
+  if(items.length===0) return 5;
+  let sum=0,n=0,weight=1;
+  items.slice(0,6).forEach(it=>{
+    const ch=it[0];
+    let v;
+    if(/\d/.test(ch)){ const pos=parseInt(ch); v=pos===0?10:Math.max(0,11-pos); } // 1er=10, 2e=9...
+    else { v=1; } // D/A/T = quasi nul
+    sum+=v*weight; n+=weight; weight*=0.85; // courses récentes pèsent plus
+  });
+  return n>0?Math.min(10,sum/n):5;
+}
+
+function buildTechPrompt(){
+  const courseCtx=`${COURSE.prix||'Quinté+'} — ${COURSE.hippo||'?'} — ${COURSE.date||''} ${COURSE.heure||''} — ${COURSE.dist||'?'} — ${COURSE.discipline||'?'} — piste ${COURSE.piste_type||'?'} ${COURSE.piste||''}`;
+  const meteoCtx=METEO.conditions?`${METEO.conditions} ${METEO.temp||''}, vent ${METEO.vent||'?'}, pluie ${METEO.pluie_risque||'?'}, impact piste: ${METEO.impact_piste||'?'}`:"météo non détaillée";
+  const runners=H.map(h=>`N°${h.num} ${h.nom}: cote=${h.cote||'?'}, sexe_age=${h.sexe||'?'} ${h.age||'?'}ans, musique=${h.musique||'?'}, gains=${h.gains||'?'}, ratio=${h.ratio||'?'}, derniere=${h.derniere||'?'}, ferrage=${h.ferrage||'?'}, driver=${h.driver||'?'} ${h.driver_stats||''}, entraineur=${h.entraineur||'?'}, consensus=${h.consensus||'?'}, forme=${h.fo}/10 ${h.forme_tend||''}, terrain=${h.te}/10, meteo=${h.meteo_av||5}/10, score_base=${(h.sc||0).toFixed(2)}`).join('\n');
+  return `Tu es analyste PMU très technique. Fais une recherche complémentaire robuste pour cette course.
+
+COURSE:
+${courseCtx}
+MÉTÉO:
+${meteoCtx}
+SOURCES/API À CROISER SI UTILE:
+${sourcePromptBlock()}
+
+PARTANTS:
+${runners}
+
+Méthode technique à appliquer pour chaque cheval:
+1) adéquation piste-distance-discipline
+2) régularité de la musique et fautes/disqualifications
+3) engagement, gains, âge/sexe, marge de progression
+4) driver/jockey + entraîneur + association
+5) ferrage/équipement et météo/piste
+6) risque caché: rentrée, baisse, mauvaise corde, mauvais profil
+7) value technique: cote trop haute ou trop basse par rapport au profil
+
+Réponds uniquement en JSON strict:
+{"resume":"2 phrases max","top_tech":[n1,n2,n3,n4,n5],"alerts":["..."],"scores":[{"num":1,"score":7.5,"confiance":70,"profil":"1 phrase courte","plus":["..."],"moins":["..."],"risque":"faible/moyen/fort","value":"oui/non/neutre"}]}
+
+Règles:
+- Inclure TOUS les numéros de la liste.
+- score sur 10.
+- confiance sur 100.
+- Si l'information manque, déduis prudemment depuis les données disponibles.`;
+}
+
+function applyTechScores(data){
+  const scores=Array.isArray(data?.scores)?data.scores:[];
+  scores.forEach(s=>{
+    const h=H.find(x=>x.num===parseInt(s.num,10));
+    if(!h) return;
+    h.techS=clamp10(s.score,5);
+    h.techConf=Math.max(0,Math.min(100,parseFloat(s.confiance)||55));
+    h.techProfil=s.profil||"";
+    h.techPlus=Array.isArray(s.plus)?s.plus.slice(0,3):[];
+    h.techMoins=Array.isArray(s.moins)?s.moins.slice(0,3):[];
+    h.techRisque=s.risque||"moyen";
+    h.techValue=s.value||"neutre";
+  });
+}
+
+function renderTechList(data){
+  const top=(data?.top_tech||[]).map(n=>'N°'+n).join(' · ');
+  let html=`<div class="card cc">
+    <div style="font-size:.68em;color:var(--cyan);font-weight:600;letter-spacing:1px;margin-bottom:7px;">🔬 SYNTHÈSE TECHNIQUE</div>
+    <div style="font-size:.72em;line-height:1.6;color:var(--text);">${data?.resume||"Analyse technique appliquée."}</div>
+    ${top?`<div style="font-size:.7em;margin-top:8px;color:var(--gold2);font-family:'JetBrains Mono',monospace;">Top technique: ${top}</div>`:''}
+    ${data?.alerts?.length?`<div style="font-size:.68em;margin-top:8px;color:#ffb060;">⚠️ ${data.alerts.slice(0,3).join(' · ')}</div>`:''}
+  </div>`;
+  const sorted=[...H].sort((a,b)=>(b.techS||0)-(a.techS||0));
+  html+=sorted.map((h,i)=>{
+    const risk=(h.techRisque||"moyen").toLowerCase();
+    const color=risk.includes("fort")?"#ff8888":risk.includes("faible")?"var(--green)":"var(--gold2)";
+    return `<div class="part-card ${i<5?'t5':''}">
+      <div class="pc-head">
+        <div class="pc-num">${h.num}</div>
+        <div class="pc-nom">${h.nom}</div>
+        <div class="pc-cote">${(h.techS||5).toFixed(1)}/10</div>
+      </div>
+      <div class="pc-info"><b>Confiance ${h.techConf||55}%</b> · Risque <span style="color:${color}">${h.techRisque||'moyen'}</span> · Value: ${h.techValue||'neutre'}</div>
+      ${h.techProfil?`<div class="pc-ctx">🔎 ${h.techProfil}</div>`:''}
+      ${h.techPlus?.length?`<div class="pc-info" style="color:var(--green);">+ ${h.techPlus.join(' · ')}</div>`:''}
+      ${h.techMoins?.length?`<div class="pc-info" style="color:#ff9999;">- ${h.techMoins.join(' · ')}</div>`:''}
+    </div>`;
+  }).join('');
+  document.getElementById('techList').innerHTML=html;
+}
+
+async function runTechSearch(){
+  if(H.length<4){alert('Validez d\'abord les partants.');return;}
+  const b=document.getElementById('techBtn');
+  b.disabled=true;b.textContent='⏳ Analyse technique...';
+  document.getElementById('techProg').style.display='block';
+  document.getElementById('techFill').style.width='20%';
+  document.getElementById('techLog').className='auto-box load';
+  document.getElementById('techLog').textContent='Recherche technique en cours : profils, risques, value, piste-distance...';
+  try{
+    calcBase();
+    document.getElementById('techFill').style.width='45%';
+    const txt=await callAPI([{role:'user',content:buildTechPrompt()}], true, 4500);
+    document.getElementById('techFill').style.width='75%';
+    const data=parseLenient(txt);
+    applyTechScores(data);
+    calcBase();
+    calcPoi();
+    renderAnalyse();
+    renderDetail();
+    renderTechList(data);
+    if(mcOK||iaOK) tryFusion();
+    document.getElementById('techLog').className='auto-box ok';
+    document.getElementById('techLog').textContent=`✅ Méthode technique appliquée\n${data.resume||''}`;
+  }catch(err){
+    document.getElementById('techLog').className='auto-box err';
+    document.getElementById('techLog').textContent=`❌ ${err.message}\n\nLa méthode technique n'a pas modifié les scores. Vérifiez la clé API ou relancez après récupération des données.`;
+  }
+  document.getElementById('techFill').style.width='100%';
+  setTimeout(()=>document.getElementById('techProg').style.display='none',600);
+  b.disabled=false;b.textContent='🔄 RELANCER MÉTHODE TECHNIQUE';
+}
+
+function calcBase(){
+  const W=getWeights();
+  COURSE._weights=W; // stocker pour affichage
+  const mx=Math.max(...H.map(h=>h.pts),1);
+  const cotes=H.map(h=>h.cote_num||20).filter(c=>c<99);
+  const cMin=cotes.length?Math.min(...cotes):1, cMax=cotes.length?Math.max(...cotes):20;
+
+  H.forEach(h=>{
+    // Composantes normalisées 0-10
+    const c_presse = h.pts/mx*10;
+    const c_forme  = h.fo;
+    const c_terrain= h.te;
+    const c_cote   = (h.cote_num&&h.cote_num<99)?((cMax-h.cote_num)/((cMax-cMin)||1))*10:5;
+    let c_driver=5;
+    if(h.driver_stats){const m=h.driver_stats.match(/(\d+)/);if(m)c_driver=Math.min(10,parseInt(m[1])/3);}
+    const c_musique= musiqueScore(h.musique);
+    const c_meteo  = h.meteo_av||5;
+    const c_tech   = Number.isFinite(parseFloat(h.techS))?clamp10(h.techS,5):null;
+
+    // Stocker les composantes pondérées (pour feature importance)
+    h.comp={
+      presse:  c_presse *W.presse,
+      forme:   c_forme  *W.forme,
+      terrain: c_terrain*W.terrain,
+      cote:    c_cote   *W.cote,
+      driver:  c_driver *W.driver,
+      musique: c_musique*W.musique,
+      meteo:   c_meteo  *W.meteo
+    };
+    h.compRaw={presse:c_presse,forme:c_forme,terrain:c_terrain,cote:c_cote,driver:c_driver,musique:c_musique,meteo:c_meteo};
+    if(c_tech!==null){
+      h.comp.technique=c_tech*0.10;
+      h.compRaw.technique=c_tech;
+    }
+
+    h.sc = Object.values(h.comp).reduce((a,b)=>a+b,0);
+
+    // Modulateurs
+    if(h.joker) h.sc*=1.08;
+    if(h.forme_tend&&h.forme_tend.toLowerCase().includes('hausse')) h.sc*=1.05;
+    if(h.forme_tend&&h.forme_tend.toLowerCase().includes('baisse')) h.sc*=0.95;
+    if(h.techRisque&&String(h.techRisque).toLowerCase().includes('fort')) h.sc*=0.96;
+    if(h.techValue&&String(h.techValue).toLowerCase().includes('oui')) h.sc*=1.04;
+  });
+  const t=H.reduce((s,h)=>s+h.sc,0)||1;
+  H.forEach(h=>h.pr=h.sc/t);
+}
+
+// ═══════════════════════════════════════════════════════
+// VALUE BET — détecte les chevaux sous-cotés (proba interne > proba marché)
+// ═══════════════════════════════════════════════════════
+function calcValueBets(){
+  H.forEach(h=>{
+    // proba implicite du marché depuis la cote décimale : 1/cote
+    const probMarche = (h.cote_num&&h.cote_num>0&&h.cote_num<99)?(1/h.cote_num):null;
+    // proba interne = fusion si dispo, sinon score de base
+    const probInterne = h.fN||h.pr||0;
+    if(probMarche!==null && probMarche>0){
+      // value = proba interne / proba marché ; >1 = sous-coté (opportunité)
+      h.value = probInterne/probMarche;
+      h.probMarche = probMarche;
+      h.probInterne = probInterne;
+    } else {
+      h.value=null;
+    }
+  });
+}
+function poisP(l,k){if(k<0||l<=0)return 0;let lp=-l+k*Math.log(l);for(let i=1;i<=k;i++)lp-=Math.log(i);return Math.exp(lp);}
+function calcPoi(){H.forEach(h=>{const l=h.pr*5;h.pT=1-poisP(l,0);});const t=H.reduce((s,h)=>s+h.pT,0)||1;H.forEach(h=>h.pN=h.pT/t);}
+function wSample(arr,n){const ch=[],av=[...arr];for(let i=0;i<Math.min(n,av.length);i++){let r=Math.random()*av.reduce((s,h)=>s+h.pr,0);for(let j=0;j<av.length;j++){r-=av[j].pr;if(r<=0){ch.push(av[j]);av.splice(j,1);break;}}}return ch;}
+
+// ═══════════════════════════════════════════════════════
+// MONTE CARLO
+// ═══════════════════════════════════════════════════════
+function runMC(){
+  if(H.length<4){alert('Validez d\'abord les partants.');return;}
+  const b=document.getElementById('simBtn');b.disabled=true;b.textContent='⏳ Simulation...';
+  document.getElementById('simProg').style.display='block';
+  calcBase();calcPoi();H.forEach(h=>mcC[h.num]=0);
+  let done=0;
+  function chunk(){
+    const e=Math.min(done+5000,100000);
+    for(let i=done;i<e;i++) wSample(H,5).forEach(h=>mcC[h.num]++);
+    done=e;const p=Math.round(done/100000*100);
+    document.getElementById('simFill').style.width=p+'%';
+    document.getElementById('simTxt').textContent=done.toLocaleString()+' / 100 000 — '+p+'%';
+    if(done<100000)requestAnimationFrame(chunk);else finMC();
+  }
+  requestAnimationFrame(chunk);
+}
+function finMC(){
+  H.forEach(h=>h.mP=mcC[h.num]/100000);
+  const t=H.reduce((s,h)=>s+h.mP,0)||1;H.forEach(h=>h.mN=h.mP/t);
+  document.getElementById('simProg').style.display='none';
+  document.getElementById('simBtn').textContent='🔄 Relancer MC';
+  document.getElementById('simBtn').disabled=false;
+  document.getElementById('s-sim').textContent='100K';
+  mcOK=true;poiOK=true;drawMC();drawPoi();tryFusion();updMeth();updSteps();
+}
+function drawMC(){
+  const s=[...H].sort((a,b)=>b.mP-a.mP),mx=s[0].mP||1;
+  document.getElementById('mcCard').innerHTML=s.map((x,i)=>{
+    const p=(x.mP*100).toFixed(1),bw=Math.round(x.mP/mx*100),t=i<5,m=['🥇','🥈','🥉'][i]||'';
+    return`<div class="hrow"><div class="rik">${m}</div><div class="hnum ${t?'t5':''}">${x.num}</div><div class="hname">${x.nom}${x.cote&&x.cote!=="?"?'<small>Cote '+x.cote+(x.driver?' · '+x.driver:'')+'</small>':''}</div><div class="hbar-w"><div class="hbar"><div class="hbar-f bg" style="width:${bw}%"></div></div></div><div class="hpct ${t?'t5':''}">${p}%</div></div>`;
+  }).join('');
+}
+function drawPoi(){
+  const s=[...H].sort((a,b)=>b.pN-a.pN),mx=s[0].pN||1;
+  document.getElementById('poiCard').innerHTML=s.map((x,i)=>{
+    const p=(x.pN*100).toFixed(1),bw=Math.round(x.pN/mx*100),t=i<5,m=['🥇','🥈','🥉'][i]||'';
+    return`<div class="hrow"><div class="rik">${m}</div><div class="hnum ${t?'t5':''}">${x.num}</div><div class="hname">${x.nom}</div><div class="hbar-w"><div class="hbar"><div class="hbar-f bb" style="width:${bw}%"></div></div></div><div class="hpct ${t?'t5':''}" style="color:${t?'var(--blue)':'var(--muted)'}">${p}%</div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// IA — prompt enrichi avec toutes les nouvelles données
+// ═══════════════════════════════════════════════════════
+async function runIA(){
+  if(H.length<4){alert('Validez d\'abord les partants.');return;}
+  const b=document.getElementById('iaBtn');b.disabled=true;b.textContent='⏳ IA...';
+  document.getElementById('iaCur').style.display='inline';
+  document.getElementById('iaResp').className='ia-box load';
+  document.getElementById('iaResp').textContent='🤖 Claude analyse les partants avec toutes les données enrichies...';
+
+  const meteoCtx=METEO.conditions?`MÉTÉO: ${METEO.conditions} ${METEO.temp||""}, vent ${METEO.vent||"?"}, pluie ${METEO.pluie_risque||"?"}. Piste ${COURSE.piste_type||""} ${COURSE.piste||"?"}. Impact: ${METEO.impact_piste||"?"}`:'';
+  const statsHippo=COURSE.stats_hippo?.tendance?`STATS HIPPODROME: ${COURSE.stats_hippo.tendance}`:'';
+  const jokerCtx=H.filter(h=>h.joker).map(h=>`N°${h.num} ${h.nom}`).join(', ');
+
+  const lines=H.map(h=>{
+    return `N°${h.num} ${h.nom}: cote=${h.cote||'?'}, ${h.sexe||'?'}/${h.age||'?'}ans, musique=${h.musique||'?'}, gains=${h.gains||'?'}, ratio=${h.ratio||'?'}, dernière=${h.derniere||'?'}, ferrage=${h.ferrage||'?'}, driver=${h.driver||'?'}${h.driver_stats?'('+h.driver_stats+')':''}, entr=${h.entraineur||'?'}, consensus=${h.consensus||'?'}, forme=${h.fo}/10 (${h.forme_tend||'?'}), terrain=${h.te}/10, météo_av=${h.meteo_av||5}/10, presse=${h.pts}/10${h.joker?' [JOKER]':''}`;
+  }).join('\n');
+
+const prompt=`Expert PMU hippique. Analyse complète du Quinté+:
+COURSE: ${COURSE.prix||'?'} — ${COURSE.hippo||'?'} — ${COURSE.date||"aujourd'hui"} ${COURSE.heure||''} — ${COURSE.dist||'?'} — ${COURSE.discipline||'?'}
+${meteoCtx}
+${statsHippo}
+${jokerCtx?'CHEVAUX JOKERS: '+jokerCtx:''}
+SOURCES/API DISPONIBLES:
+${sourcePromptBlock()}
+
+PARTANTS (${H.length}):
+${lines}
+
+Pour chaque cheval, attribue un score 0-10 de probabilité top5 en tenant compte de TOUS les paramètres : cote (favoris vs outsiders), musique (régularité), forme, terrain/piste, météo, driver, ferrage, joker.
+Réponds UNIQUEMENT en JSON strict:
+{"scores":[${H.map(h=>`{"num":${h.num},"score":X}`).join(',')}],"ia_top5":[n1,n2,n3,n4,n5],"synthese":"3 phrases intégrant cote+musique+météo+drivers"}`;
+
+  try{
+    let txt=await callAPI([{role:"user",content:prompt}], false, 2500);
+    txt=txt.replace(/```json|```/g,'').trim();
+    let p=parseLenient(txt);
+    if(p.scores)p.scores.forEach(s=>{const h=H.find(x=>x.num===s.num);if(h)h.iaS=s.score;});
+    // si certains chevaux n'ont pas de score (tronqué), leur donner le score de base
+    H.forEach(h=>{if(h.iaS===undefined||h.iaS===0&&!p.scores.find(s=>s.num===h.num))h.iaS=h.sc;});
+    const t=H.reduce((s,h)=>s+(h.iaS||0),0)||1;H.forEach(h=>h.iaN=(h.iaS||0)/t);
+    document.getElementById('iaResp').className='ia-box';
+    document.getElementById('iaResp').textContent=`✅ Analyse complète\n\n🏆 Top 5 IA: ${(p.ia_top5||[]).map(n=>'N°'+n).join(' · ')}\n\n📝 ${p.synthese||''}`;
+    drawIA();iaOK=true;tryFusion();updMeth();updSteps();
+  }catch(err){
+    document.getElementById('iaResp').className='ia-box';
+    document.getElementById('iaResp').textContent=`⚠️ ${err.message} — Fallback presse.`;
+    H.forEach(h=>{h.iaS=h.sc;h.iaN=h.pr;});drawIA();iaOK=true;tryFusion();updMeth();updSteps();
+  }
+  document.getElementById('iaCur').style.display='none';b.disabled=false;b.textContent='🔄 Relancer IA';
+}
+function drawIA(){
+  const s=[...H].sort((a,b)=>(b.iaN||0)-(a.iaN||0)),mx=s[0].iaN||1;
+  document.getElementById('iaScores').innerHTML=s.map((x,i)=>{
+    const p=((x.iaN||0)*100).toFixed(1),bw=Math.round((x.iaN||0)/mx*100),t=i<5,m=['🥇','🥈','🥉'][i]||'';
+    return`<div class="hrow"><div class="rik">${m}</div><div class="hnum ${t?'t5':''}">${x.num}</div><div class="hname">${x.nom}<small>Score IA: ${(x.iaS||0).toFixed(1)}/10 ${x.cote&&x.cote!=="?"?'· Cote '+x.cote:''}</small></div><div class="hbar-w"><div class="hbar"><div class="hbar-f bpu" style="width:${bw}%"></div></div></div><div class="hpct ${t?'t5':''}" style="color:${t?'var(--purple)':'var(--muted)'}">${p}%</div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// FUSION
+// ═══════════════════════════════════════════════════════
+function tryFusion(){
+  if(!mcOK&&!iaOK)return;
+  H.forEach(h=>{
+    let wm=0,wp=0,wi=0;
+    if(mcOK&&iaOK){wm=.35;wp=.30;wi=.35;}
+    else if(mcOK){wm=.55;wp=.45;}
+    else{wi=1;}
+    h.fu=(h.mN||0)*wm+(h.pN||0)*wp+(h.iaN||0)*wi;
+  });
+  const t=H.reduce((s,h)=>s+h.fu,0)||1;H.forEach(h=>h.fN=h.fu/t);
+  drawFusion();
+  if(document.getElementById('valueList')) renderValueBets();
+  const nd=document.getElementById('fusNote');
+  if(mcOK&&iaOK){nd.textContent='✅ MC 35% + Poisson 30% + IA 35% — Fusion complète';nd.style.color='var(--green)';}
+  else if(mcOK){nd.textContent='⚠️ MC 55% + Poisson 45% — IA non lancée';nd.style.color='var(--gold2)';}
+  else{nd.textContent='⚠️ IA seule';nd.style.color='var(--orange)';}
+}
+function drawFusion(){
+  const s=[...H].sort((a,b)=>b.fN-a.fN),mx=s[0].fN||1;
+  document.getElementById('fusCard').innerHTML=s.map((x,i)=>{
+    const p=(x.fN*100).toFixed(1),bw=Math.round(x.fN/mx*100),t=i<5;
+    const mp=mcOK?(x.mN*100).toFixed(0)+'%':'–',pp=poiOK?(x.pN*100).toFixed(0)+'%':'–',ip=iaOK?(x.iaN*100).toFixed(0)+'%':'–';
+    return`<div class="frow"><div class="frank ${t?'t5':''}">${i+1}</div><div class="hnum ${t?'t5':''}">${x.num}</div><div class="hname" style="flex:1">${x.nom}${x.cote&&x.cote!=="?"?' <span style="color:var(--gold2);font-size:.85em;">'+x.cote+'</span>':''}<div style="display:flex;gap:3px;margin-top:2px;flex-wrap:wrap"><span class="badge bmc">MC ${mp}</span><span class="badge bpo">P ${pp}</span><span class="badge bia">IA ${ip}</span></div></div><div style="flex:2;padding-left:7px"><div class="hbar"><div class="hbar-f bv" style="width:${bw}%"></div></div><div style="font-family:'JetBrains Mono',monospace;font-size:.63em;color:${t?'var(--green)':'var(--muted)'};text-align:right;margin-top:2px">${p}%</div></div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// PRONOSTICS
+// ═══════════════════════════════════════════════════════
+function getRanked(){H.forEach(h=>{if(!h.fN)h.fN=h.pr||0;});return [...H].sort((a,b)=>b.fN-a.fN);}
+function buildPronoPrompt(){
+  const r=getRanked();
+  const top=r.slice(0,Math.min(8,r.length)).map(h=>`N°${h.num} ${h.nom}(${h.cote||'?'}, fusion ${(h.fN*100).toFixed(1)}%)`).join(', ');
+  const meteoP=METEO.conditions?`MÉTÉO: ${METEO.conditions} ${METEO.temp||""}, piste ${COURSE.piste||"?"}, impact: ${METEO.impact_piste||"?"}`:'';
+  const jokers=H.filter(h=>h.joker).map(h=>`N°${h.num} ${h.nom} (${h.joker_raison||"joker"})`).join(' | ')||'aucun';
+
+  return `Expert PMU. ${COURSE.prix||'Quinté+'} — ${COURSE.hippo||'?'} — ${COURSE.date||"aujourd'hui"} ${COURSE.heure||''} — ${COURSE.dist||'?'} — ${H.length} partants.
+
+${meteoP}
+JOKERS: ${jokers}
+CLASSEMENT FUSION: ${top}
+SOURCES/API DISPONIBLES:
+${sourcePromptBlock()}
+
+DONNÉES COMPLÈTES PARTANTS:
+${H.map(h=>`N°${h.num} ${h.nom}: cote=${h.cote}, ${h.sexe}/${h.age}ans, musique=${h.musique}, gains=${h.gains}, ratio=${h.ratio}, dernière=${h.derniere}, ferr=${h.ferrage}, driver=${h.driver}${h.driver_stats?'('+h.driver_stats+')':''}, consensus=${h.consensus||'?'}, forme=${h.fo}/10(${h.forme_tend}), terrain=${h.te}/10, météo=${h.meteo_av||5}/10, fusion=${(h.fN*100).toFixed(1)}%${h.joker?' [JOKER]':''}`).join('\n')}
+
+Génère 5 pronostics Quinté+ DIVERSIFIÉS et complémentaires. Tiens compte: cotes (favoris/outsiders), musique (régularité), météo & piste, drivers, jokers.
+JSON strict uniquement:
+{"verdict":"3 phrases d'analyse intégrant cotes+musique+météo+drivers+jokers","pronos":[{"id":1,"titre":"NOM MAJUSCULES","top5":[n1,n2,n3,n4,n5],"base":n,"tocard":n,"tierce":[n1,n2,n3],"confiance":75,"paris":{"simple_gagnant":"N°XX","couple_gagnant":"N°XX-N°XX","tierce_desordre":"N°XX-N°XX-N°XX","quarte_desordre":"N°XX-N°XX-N°XX-N°XX"},"raisonnement":"2-3 phrases avec données cote+musique+météo"}]}`;
+}
+
+async function runPronos(){
+  if(H.length<4){alert('Validez d\'abord les partants.');return;}
+  const b=document.getElementById('pronoBtn');b.disabled=true;b.textContent='⏳ Génération...';
+  document.getElementById('pronoProg').style.display='block';
+  document.getElementById('pronoLog').className='prono-log load';
+  document.getElementById('pronoLog').textContent='🏆 Génération des 5 pronostics avec toutes les données enrichies...';
+  try{
+    document.getElementById('pronoFill').style.width='30%';document.getElementById('pronoTxt').textContent='Claude...';
+    const txt=(await callAPI([{role:"user",content:buildPronoPrompt()}], false, 3000)).replace(/```json|```/g,'').trim();
+    document.getElementById('pronoFill').style.width='70%';
+    let p=parseLenient(txt);
+    document.getElementById('pronoFill').style.width='95%';
+    if(!p.pronos||p.pronos.length===0){
+      // JSON trop tronqué : générer en local
+      document.getElementById('pronoLog').className='prono-log';
+      document.getElementById('pronoLog').textContent='⚠️ Réponse IA incomplète — génération locale des pronostics';
+      drawPronosLocal();
+    } else {
+      document.getElementById('pronoLog').className='prono-log';
+      document.getElementById('pronoLog').textContent=`✅ ${p.pronos.length} pronostics enrichis${p._repaired?' (réparé)':''}\n\n⚡ Verdict: ${p.verdict||''}`;
+      drawPronos(p.pronos,p.verdict||'');
+    }
+    proOK=true;updSteps();
+  }catch(err){
+    document.getElementById('pronoLog').className='prono-log';
+    document.getElementById('pronoLog').textContent=`⚠️ ${err.message}\nGénération locale...`;
+    drawPronosLocal();proOK=true;updSteps();
+  }
+  document.getElementById('pronoFill').style.width='100%';
+  setTimeout(()=>document.getElementById('pronoProg').style.display='none',600);
+  b.disabled=false;b.textContent='🔄 Régénérer';
+}
+
+const RKC=['r1','r2','r3','r4','r5'],PCC=['pc1','pc2','pc3','pc4','pc5'];
+function drawPronos(pronos,verdict){
+  let html='';
+  if(verdict)html+=`<div class="verdict"><div class="vttl">⚡ Verdict Expert IA</div><div class="vtxt">${verdict}</div></div>`;
+  pronos.forEach((p,i)=>{
+    const t5=p.top5||[],conf=p.confiance||65;
+    const cc=conf>=75?'var(--green)':conf>=60?'var(--gold2)':'var(--orange)';
+    const bh=H.find(h=>h.num===p.base),th=H.find(h=>h.num===p.tocard),tierce=p.tierce||t5.slice(0,3),paris=p.paris||{};
+    const grid=t5.map((n,ri)=>{const h=H.find(x=>x.num===n);return`<div class="pg-item"><div class="pg-rank">${['1er','2e','3e','4e','5e'][ri]}</div><div class="pg-bub ${RKC[ri]}">${n}</div><div class="pg-name">${h?h.sh:'?'}${h&&h.cote&&h.cote!=="?"?'<br>'+h.cote:''}</div></div>`;}).join('');
+    const bets=`<div class="pbet-sec"><div class="pbet-ttl">💰 Paris recommandés</div><div class="pbet-row">
+      <div class="pbet"><div class="pbet-lbl">Simple Gagnant</div><div class="pbet-val">${paris.simple_gagnant||'N°'+t5[0]}</div></div>
+      <div class="pbet"><div class="pbet-lbl">Couplé Gagnant</div><div class="pbet-val">${paris.couple_gagnant||'N°'+t5[0]+'-N°'+t5[1]}</div></div>
+      <div class="pbet"><div class="pbet-lbl">Tiercé Désordre</div><div class="pbet-val">${paris.tierce_desordre||tierce.map(n=>'N°'+n).join('-')}</div></div>
+      <div class="pbet"><div class="pbet-lbl">Quarté Désordre</div><div class="pbet-val">${paris.quarte_desordre||t5.slice(0,4).map(n=>'N°'+n).join('-')}</div></div>
+    </div></div>`;
+    html+=`<div class="pcard ${PCC[i]}"><div class="phdr"><div><div class="plbl">Pronostic ${i+1}/5</div><div class="ptit">${p.titre||'PRONO '+(i+1)}</div></div><div class="pconf-w"><div class="cbar"><div class="cbar-f" style="width:${conf}%;background:${cc}"></div></div><div class="cpct" style="color:${cc}">Confiance ${conf}%</div></div></div><div class="pgrid">${grid}</div><div class="pmeta"><div class="ptag hl">🎯 Base: N°${p.base||'?'} ${bh?bh.sh:''}</div><div class="ptag hp">💡 Surprise: N°${p.tocard||'?'} ${th?th.sh:''}</div><div class="ptag hg">Tiercé: ${tierce.map(n=>'N°'+n).join('-')}</div></div>${bets}<div class="preason">${p.raisonnement||''}</div></div>`;
+  });
+  document.getElementById('pronoCont').innerHTML=html;
+}
+
+function drawPronosLocal(){
+  const r=getRanked();if(r.length<5)return;
+  drawPronos([
+    {id:1,titre:'BASE FUSION',top5:r.slice(0,5).map(h=>h.num),base:r[0].num,tocard:r[4].num,tierce:[r[0].num,r[1].num,r[2].num],confiance:75,paris:{simple_gagnant:'N°'+r[0].num,couple_gagnant:'N°'+r[0].num+'-N°'+r[1].num,tierce_desordre:'N°'+r[0].num+'-N°'+r[1].num+'-N°'+r[2].num,quarte_desordre:'N°'+r[0].num+'-N°'+r[1].num+'-N°'+r[2].num+'-N°'+r[3].num},raisonnement:`N°${r[0].num} ${r[0].nom} (cote ${r[0].cote||'?'}) domine la fusion. ${r[1].nom} en second.`},
+    {id:2,titre:'VARIANTE A',top5:[r[0].num,r[1].num,r[2].num,r[3].num,r[Math.min(5,r.length-1)].num],base:r[0].num,tocard:r[Math.min(5,r.length-1)].num,tierce:[r[0].num,r[1].num,r[2].num],confiance:66,paris:{simple_gagnant:'N°'+r[0].num,couple_gagnant:'N°'+r[0].num+'-N°'+r[1].num,tierce_desordre:'N°'+r[0].num+'-N°'+r[1].num+'-N°'+r[2].num,quarte_desordre:'N°'+r[0].num+'-N°'+r[1].num+'-N°'+r[2].num+'-N°'+r[3].num},raisonnement:"Top 4 + 6e cheval."},
+    {id:3,titre:'IA PURE',top5:[...H].sort((a,b)=>(b.iaN||b.pr)-(a.iaN||a.pr)).slice(0,5).map(h=>h.num),base:r[0].num,tocard:r[Math.min(5,r.length-1)].num,tierce:[r[0].num,r[1].num,r[2].num],confiance:62,paris:{simple_gagnant:'N°'+r[0].num,couple_gagnant:'N°'+r[0].num+'-N°'+r[1].num,tierce_desordre:'N°'+r[0].num+'-N°'+r[1].num+'-N°'+r[2].num,quarte_desordre:'N°'+r[0].num+'-N°'+r[1].num+'-N°'+r[2].num+'-N°'+r[3].num},raisonnement:"Classement IA pur."},
+    {id:4,titre:'CONTRARIAN',top5:[r[0].num,r[1].num,r[3].num,r[Math.min(5,r.length-1)].num,r[Math.min(7,r.length-1)].num],base:r[0].num,tocard:r[Math.min(7,r.length-1)].num,tierce:[r[0].num,r[1].num,r[3].num],confiance:50,paris:{simple_gagnant:'N°'+r[0].num,couple_gagnant:'N°'+r[0].num+'-N°'+r[1].num,tierce_desordre:'N°'+r[0].num+'-N°'+r[1].num+'-N°'+r[3].num,quarte_desordre:'N°'+r[0].num+'-N°'+r[1].num+'-N°'+r[3].num+'-N°'+r[Math.min(5,r.length-1)].num},raisonnement:"Top 2 + outsiders."},
+    {id:5,titre:'FULL SURPRISE',top5:r.slice(2,7).map(h=>h.num),base:r[2].num,tocard:r[Math.min(6,r.length-1)].num,tierce:[r[2].num,r[3].num,r[4].num],confiance:36,paris:{simple_gagnant:'N°'+r[2].num,couple_gagnant:'N°'+r[2].num+'-N°'+r[3].num,tierce_desordre:'N°'+r[2].num+'-N°'+r[3].num+'-N°'+r[4].num,quarte_desordre:'N°'+r[2].num+'-N°'+r[3].num+'-N°'+r[4].num+'-N°'+r[Math.min(5,r.length-1)].num},raisonnement:"Sans les 2 favoris."},
+  ],`N°${r[0].num} ${r[0].nom} (${r[0].cote||'?'}) domine. N°${r[1].num} ${r[1].nom} en second.`);
+}
+
+// ═══════════════════════════════════════════════════════
+// RÉSULTAT OFFICIEL — comparaison après course
+// ═══════════════════════════════════════════════════════
+function parseNums(s){
+  return String(s||"").match(/\d+/g)?.map(x=>parseInt(x,10)).filter(n=>Number.isFinite(n))||[];
+}
+function evalResult(){
+  const res=parseNums(document.getElementById('resultInput')?.value||'');
+  const box=document.getElementById('resultBox');
+  if(res.length<3){box.innerHTML='<div class="empty"><div class="ei">✅</div>Entrez au moins 3 numéros.</div>';return;}
+  const ranked=getRanked();
+  if(ranked.length<3){box.innerHTML='<div class="empty"><div class="ei">✅</div>Validez les partants puis comparez.</div>';return;}
+  const pred=ranked.slice(0,5).map(h=>h.num);
+  const pred8=ranked.slice(0,8).map(h=>h.num);
+  const hit5=res.slice(0,5).filter(n=>pred.includes(n));
+  const hit8=res.slice(0,5).filter(n=>pred8.includes(n));
+  const exact=res.slice(0,5).filter((n,i)=>pred[i]===n);
+  const tierce=res.slice(0,3).filter(n=>pred.slice(0,3).includes(n));
+  const ordreTxt=exact.length?`${exact.length}/5 à la bonne place`:'aucune bonne place dans le top 5';
+  const score=Math.round((hit5.length/5)*70 + (exact.length/5)*30);
+  const rankMap=new Map(ranked.map((h,i)=>[h.num,i+1]));
+  const rows=res.slice(0,5).map((n,i)=>{
+    const h=H.find(x=>x.num===n);
+    const rg=rankMap.get(n)||'?';
+    const ok=pred.includes(n);
+    const exactOk=pred[i]===n;
+    return `<div class="frow">
+      <div class="frank ${ok?'t5':''}">${i+1}</div>
+      <div class="hnum ${ok?'t5':''}">${n}</div>
+      <div class="hname">${h?`${h.nom}<small>Rang modèle: ${rg}${h.cote&&h.cote!=="?"?' · Cote '+h.cote:''}</small>`:`Cheval N°${n}<small>Rang modèle: ${rg}</small>`}</div>
+      <div class="badge ${exactOk?'bfu':ok?'bmc':'bpo'}">${exactOk?'ordre':ok?'trouvé':'hors top5'}</div>
+    </div>`;
+  }).join('');
+  const verdict=score>=75?'Très bon ciblage':score>=55?'Base correcte':score>=35?'Partiel':"À revoir";
+  box.innerHTML=`<div class="pcard pc1">
+    <div class="phdr">
+      <div><div class="plbl">Résultat officiel</div><div class="ptit">${res.slice(0,5).map(n=>'N°'+n).join(' - ')}</div></div>
+      <div class="pconf-w"><div class="cbar"><div class="cbar-f" style="width:${score}%;background:var(--green)"></div></div><div class="cpct" style="color:var(--green)">Score ${score}%</div></div>
+    </div>
+    <div class="pmeta">
+      <div class="ptag hl">Top 5 trouvé: ${hit5.length}/5</div>
+      <div class="ptag hg">Top 8 trouvé: ${hit8.length}/5</div>
+      <div class="ptag">Tiercé désordre: ${tierce.length}/3</div>
+      <div class="ptag">${ordreTxt}</div>
+    </div>
+    <div class="preason"><b>${verdict}</b> · Pronostic modèle: ${pred.map(n=>'N°'+n).join(' - ')}</div>
+  </div>
+  <div class="card cv">${rows}</div>`;
+}
+
+// ═══ HELPERS ═══
+function updMeth(){let n=0;if(mcOK)n++;if(poiOK)n++;if(iaOK)n++;document.getElementById('s-meth').textContent=n+'/3';}
+function updSteps(){
+  if(mcOK){const s=document.getElementById('st1');s.className='step done';s.querySelector('.sdot').textContent='✓';}
+  if(iaOK){const s=document.getElementById('st2');s.className='step done';s.querySelector('.sdot').textContent='✓';}
+  if(mcOK||iaOK){const s=document.getElementById('st3');s.className='step done';s.querySelector('.sdot').textContent='✓';}
+  if(proOK){const s=document.getElementById('st4');s.className='step done';s.querySelector('.sdot').textContent='✓';}
+  else if(mcOK||iaOK){document.getElementById('st4').className='step act';}
+}
+// ═══════════════════════════════════════════════════════
+// GÉNÉRATION DES PARIS — Tiercé / Quarté+ / Quinté+ / Couplé / 2sur4
+// Basé sur le classement de fusion (ou score de base si pas de fusion)
+// ═══════════════════════════════════════════════════════
+function genererParis(){
+  if(H.length<4){alert("Validez d'abord les partants (onglet Auto ou Manuel).");return;}
+  const r=getRanked();
+  if(r.length<4){alert("Pas assez de partants.");return;}
+
+  const num=h=>h?h.num:'?';
+  const nm =h=>h?h.sh:'?';
+
+  // helpers d'affichage
+  function balls(arr,ordered){
+    return arr.map((h,i)=>{
+      const cls=ordered?(['ord1','ord2','ord3'][i]||'ordX'):'ordX';
+      let html=`<div class="bet-ball ${cls}">${num(h)}</div>`;
+      if(ordered && i<arr.length-1) html+='<span class="bet-arrow">›</span>';
+      return html;
+    }).join('');
+  }
+  // combinaisons (factorielle)
+  const fact=n=>n<=1?1:n*fact(n-1);
+  const combi=(n,k)=>fact(n)/(fact(k)*fact(n-k));
+
+  let html='';
+
+  // ───────────── TIERCÉ ─────────────
+  // base : 3 premiers de la fusion, ordre conseillé
+  const t3=r.slice(0,3);
+  const tElargi=r.slice(0,5); // pour le champ réduit
+  html+=`<div class="bet-card bet-tierce">
+    <div class="bet-head"><div class="bet-title">🥉 Tiercé</div><div class="bet-type">3 chevaux · ordre</div></div>
+    <div class="bet-line"><b>Ordre conseillé</b> (le plus probable selon la fusion)</div>
+    <div class="bet-combo">${balls(t3,true)}</div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">🎯 Tiercé Ordre (mise sèche)</div>
+      <div class="bet-variant-combo">${t3.map(num).join(' - ')}</div>
+    </div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">🔄 Tiercé Désordre (sécurité)</div>
+      <div class="bet-variant-combo">${t3.map(num).join(' / ')}</div>
+    </div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">📊 Champ réduit 5 chevaux (${combi(5,3)} combinaisons)</div>
+      <div class="bet-variant-combo">${tElargi.map(num).join(' - ')}</div>
+    </div>
+    <div class="bet-mise">
+      <span class="bet-mise-lbl">Mise base 1€ · Désordre = 6 ordres</span>
+      <span class="bet-cost">Réduit 5ch ≈ ${combi(5,3)}€</span>
+    </div>
+  </div>`;
+
+  // ───────────── QUARTÉ+ ─────────────
+  const q4=r.slice(0,4);
+  const q4Elargi=r.slice(0,6);
+  html+=`<div class="bet-card bet-quarte">
+    <div class="bet-head"><div class="bet-title">🔵 Quarté+</div><div class="bet-type">4 chevaux · ordre</div></div>
+    <div class="bet-line"><b>Ordre conseillé</b></div>
+    <div class="bet-combo">${balls(q4,true)}</div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">🎯 Quarté+ Ordre</div>
+      <div class="bet-variant-combo">${q4.map(num).join(' - ')}</div>
+    </div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">🔄 Quarté+ Désordre</div>
+      <div class="bet-variant-combo">${q4.map(num).join(' / ')}</div>
+    </div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">📊 Champ réduit 6 chevaux (${combi(6,4)} combinaisons)</div>
+      <div class="bet-variant-combo">${q4Elargi.map(num).join(' - ')}</div>
+    </div>
+    <div class="bet-mise">
+      <span class="bet-mise-lbl">Désordre 4ch = 24 ordres possibles</span>
+      <span class="bet-cost">Réduit 6ch ≈ ${combi(6,4)}€</span>
+    </div>
+  </div>`;
+
+  // ───────────── QUINTÉ+ ─────────────
+  const q5=r.slice(0,5);
+  const q5Elargi=r.slice(0,7);
+  const q5Elargi8=r.slice(0,8);
+  html+=`<div class="bet-card bet-quinte">
+    <div class="bet-head"><div class="bet-title">🏆 Quinté+</div><div class="bet-type">5 chevaux · ordre</div></div>
+    <div class="bet-line"><b>Ordre conseillé</b> — combinaison principale</div>
+    <div class="bet-combo">${balls(q5,true)}</div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">🎯 Quinté+ Ordre (jackpot)</div>
+      <div class="bet-variant-combo">${q5.map(num).join(' - ')}</div>
+    </div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">🔄 Quinté+ Désordre</div>
+      <div class="bet-variant-combo">${q5.map(num).join(' / ')}</div>
+    </div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">📊 Champ réduit 7 chevaux (${combi(7,5)} combinaisons)</div>
+      <div class="bet-variant-combo">${q5Elargi.map(num).join(' - ')}</div>
+    </div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">📊 Champ réduit 8 chevaux (${combi(8,5)} combinaisons)</div>
+      <div class="bet-variant-combo">${q5Elargi8.map(num).join(' - ')}</div>
+    </div>
+    <div class="bet-mise">
+      <span class="bet-mise-lbl">Base 2€ · Désordre = 120 ordres</span>
+      <span class="bet-cost">Réduit 7ch ≈ ${combi(7,5)*2}€</span>
+    </div>
+  </div>`;
+
+  // ───────────── COUPLÉ ─────────────
+  const c2=r.slice(0,2);
+  const cBase=r[0], cPartenaires=r.slice(1,5);
+  html+=`<div class="bet-card bet-couple">
+    <div class="bet-head"><div class="bet-title">🟢 Couplé</div><div class="bet-type">2 chevaux</div></div>
+    <div class="bet-line"><b>Duo de tête</b> (les 2 favoris de la fusion)</div>
+    <div class="bet-combo">${balls(c2,false)}</div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">🥇 Couplé Gagnant (dans les 2 premiers, ordre indifférent)</div>
+      <div class="bet-variant-combo">${num(c2[0])} - ${num(c2[1])}</div>
+    </div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">🥉 Couplé Placé (dans les 3 premiers)</div>
+      <div class="bet-variant-combo">${num(c2[0])} - ${num(c2[1])} · ${num(c2[0])} - ${num(r[2])} · ${num(c2[1])} - ${num(r[2])}</div>
+    </div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">🔗 Couplé Base ${nm(cBase)} (N°${num(cBase)}) + 4 chevaux</div>
+      <div class="bet-variant-combo">${num(cBase)} associé à : ${cPartenaires.map(num).join(', ')}</div>
+    </div>
+    <div class="bet-mise">
+      <span class="bet-mise-lbl">Couplé base + 4 = 4 combinaisons</span>
+      <span class="bet-cost">≈ ${4}€ (1€/combi)</span>
+    </div>
+  </div>`;
+
+  // ───────────── 2 SUR 4 ─────────────
+  const s4=r.slice(0,4);
+  const s4Elargi=r.slice(0,5);
+  html+=`<div class="bet-card bet-2sur4">
+    <div class="bet-head"><div class="bet-title">🟣 2 sur 4</div><div class="bet-type">2 parmi 4 premiers</div></div>
+    <div class="bet-line"><b>Trouver 2 chevaux</b> parmi les 4 premiers à l'arrivée</div>
+    <div class="bet-combo">${balls(s4,false)}</div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">🎯 Combinaison de base (4 chevaux = ${combi(4,2)} couples)</div>
+      <div class="bet-variant-combo">${s4.map(num).join(' - ')}</div>
+    </div>
+    <div class="bet-variant">
+      <div class="bet-variant-lbl">📊 Élargi 5 chevaux (${combi(5,2)} couples)</div>
+      <div class="bet-variant-combo">${s4Elargi.map(num).join(' - ')}</div>
+    </div>
+    <div class="bet-mise">
+      <span class="bet-mise-lbl">Mise mini 3€ par combinaison</span>
+      <span class="bet-cost">Base 4ch ≈ ${combi(4,2)*3}€</span>
+    </div>
+  </div>`;
+
+  // ───────────── MULTI / CONSEIL BUDGET ─────────────
+  const joker=H.find(h=>h.joker);
+  html+=`<div class="bet-card bet-multi">
+    <div class="bet-head"><div class="bet-title">💡 Conseil de jeu</div><div class="bet-type">Stratégie budget</div></div>
+    <div class="bet-line">
+      <b>Petit budget (5€)</b> : Couplé Gagnant ${num(r[0])}-${num(r[1])} + Tiercé Désordre ${r.slice(0,3).map(num).join('-')}<br><br>
+      <b>Budget moyen (15€)</b> : Quarté+ Désordre ${r.slice(0,4).map(num).join('-')} + 2sur4 base<br><br>
+      <b>Gros budget (30€+)</b> : Quinté+ champ réduit 7 chevaux ${r.slice(0,7).map(num).join('-')}
+      ${joker?`<br><br>🃏 <b>Astuce joker</b> : glissez N°${joker.num} ${joker.sh} dans vos combinaisons Désordre pour booster le rapport`:''}
+    </div>
+  </div>`;
+
+  document.getElementById('parisCont').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER ANALYSE — pondérations + feature importance + value bets
+// ═══════════════════════════════════════════════════════
+const COMP_COLORS={presse:'#f0c040',forme:'#00e08a',terrain:'#1e90e8',cote:'#ff8c00',driver:'#9b59ff',musique:'#00d4ff',meteo:'#5a7090',technique:'#ff4fd8'};
+const COMP_LABELS={presse:'Presse',forme:'Forme',terrain:'Terrain',cote:'Cote',driver:'Driver',musique:'Musique',meteo:'Météo',technique:'Technique'};
+
+function renderAnalyse(){
+  if(H.length===0){return;}
+  const W=COURSE._weights||getWeights();
+
+  // 1) Pondérations
+  let wsegs='',wleg='';
+  Object.keys(W).forEach(k=>{
+    const pct=Math.round(W[k]*100);
+    wsegs+=`<div class="wseg ws-${k}" style="width:${pct}%">${pct>7?pct+'%':''}</div>`;
+    wleg+=`<div class="wl"><div class="wl-dot" style="background:${COMP_COLORS[k]}"></div>${COMP_LABELS[k]} ${pct}%</div>`;
+  });
+  document.getElementById('weightsDisplay').innerHTML=
+    `<div style="font-size:.65em;color:var(--muted);margin-bottom:8px;">Discipline détectée : <b style="color:var(--gold2)">${COURSE.discipline||'?'}</b>${(COURSE.prix||'').toLowerCase().includes('handicap')?' · <b style="color:var(--orange)">Handicap</b>':''}</div>`+
+    `<div class="weight-bar">${wsegs}</div><div class="wlegend">${wleg}</div>`;
+
+  // 2) Feature importance par cheval
+  const sorted=[...H].sort((a,b)=>b.sc-a.sc);
+  const maxSc=sorted[0].sc||1;
+  let fhtml='';
+  sorted.forEach((h,i)=>{
+    if(!h.comp){return;}
+    const total=h.sc||1;
+    let segs='';
+    Object.keys(h.comp).forEach(k=>{
+      const share=h.comp[k]/total*100;
+      if(share>0.5) segs+=`<div class="acseg" style="width:${share}%;background:${COMP_COLORS[k]}" title="${COMP_LABELS[k]}: ${h.comp[k].toFixed(2)}"></div>`;
+    });
+    fhtml+=`<div class="acard ${i<5?'t5':''}">
+      <div class="ahead">
+        <div class="anum">${h.num}</div>
+        <div class="aname">${h.nom}${h.joker?' 🃏':''}</div>
+        <div class="ascore">${h.sc.toFixed(2)} pts</div>
+      </div>
+      <div class="acomp">${segs}</div>
+      <div style="font-size:.58em;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace;">
+        ${Object.keys(h.compRaw).map(k=>`${COMP_LABELS[k].substring(0,3)} ${h.compRaw[k].toFixed(1)}`).join(' · ')}
+      </div>
+    </div>`;
+  });
+  document.getElementById('featureList').innerHTML=fhtml;
+
+  // 3) Value bets
+  renderValueBets();
+}
+
+function renderValueBets(){
+  calcValueBets();
+  const withVal=H.filter(h=>h.value!==null&&h.value!==undefined);
+  if(withVal.length===0){
+    document.getElementById('valueList').innerHTML='<div class="empty"><div class="ei">💎</div>Pas de cotes disponibles pour calculer les value bets.<br>Récupérez les cotes via l\'onglet Auto.</div>';
+    return;
+  }
+  const sorted=[...withVal].sort((a,b)=>b.value-a.value);
+  let html='';
+  sorted.forEach(h=>{
+    const v=h.value;
+    const cls=v>=1.3?'opp':v<0.8?'over':'';
+    const badgeCls=v>=1.3?'opp':v<0.8?'over':'fair';
+    const label=v>=1.3?'SOUS-COTÉ ✓':v<0.8?'sur-coté':'équitable';
+    html+=`<div class="value-card ${cls}">
+      <div class="vc-num">${h.num}</div>
+      <div class="vc-info">
+        <div class="vc-name">${h.nom} ${h.cote&&h.cote!=="?"?'· '+h.cote:''}</div>
+        <div class="vc-detail">Modèle ${(h.probInterne*100).toFixed(1)}% vs Marché ${(h.probMarche*100).toFixed(1)}%</div>
+      </div>
+      <div class="vc-badge ${badgeCls}">×${v.toFixed(2)}<br><span style="font-size:.7em;font-weight:400;">${label}</span></div>
+    </div>`;
+  });
+  document.getElementById('valueList').innerHTML=html;
+}
+
+function sw(t){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelector('.t-'+t).classList.add('on');
+  document.getElementById('panel-'+t).classList.add('on');
+}
+
+// INIT
+initDatePicker();
+initApiKeyUI();
+initTable();
+</script>
+</body>
+</html>
