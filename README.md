@@ -16,6 +16,8 @@ Application HTML autonome pour préparer des pronostics Quinté+ avec récupéra
 ## Fichiers
 
 - `index.html` : application complète.
+- `quinte_engine.py` : moteur Python avancé pour calculer classement, probabilités, value bets et tickets.
+- `examples/sample_race.json` : exemple de données pour tester le moteur Python.
 - `cloudflare-worker/openai_proxy_cloudflare_worker.js` : proxy Cloudflare Worker pour OpenAI.
 - `cloudflare-worker/openai_proxy_cloudflare_worker.mjs` : même proxy en module ES pour validation locale.
 
@@ -30,6 +32,33 @@ Sur Android/WebView, l'appel direct vers OpenAI peut être bloqué. Dans ce cas 
 3. Collez cette URL dans le champ `Proxy OpenAI`.
 4. Cliquez sur `Proxy`.
 5. Collez votre clé OpenAI dans le champ API, puis cliquez `Sauver`.
+
+## Moteur Python de pronostic
+
+Le moteur Python fonctionne sans dépendance externe.
+
+Exemple :
+
+```powershell
+python quinte_engine.py examples/sample_race.json --runs 50000 --pretty
+```
+
+Sortie JSON complète :
+
+```powershell
+python quinte_engine.py examples/sample_race.json --runs 100000
+```
+
+Le moteur combine :
+
+- score presse/forme/terrain/musique
+- probabilité implicite des cotes
+- driver/jockey et consensus presse
+- météo et méthode technique
+- pénalités de risque
+- détection value bet
+- simulation pondérée de type Plackett-Luce
+- génération de tickets Quinté ordre/désordre, champ réduit, Quarté et Tiercé
 
 ## Déployer le proxy Cloudflare Worker
 

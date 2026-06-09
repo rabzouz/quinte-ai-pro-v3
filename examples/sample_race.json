@@ -1,0 +1,19 @@
+{
+  "course": {
+    "prix": "Quinté+ exemple",
+    "hippodrome": "Vincennes",
+    "discipline": "Trot Attelé",
+    "distance": "2700m",
+    "piste_etat": "bonne"
+  },
+  "horses": [
+    {"num": 1, "nom": "Cheval A", "cote": "6.5", "presse": 8, "forme": 7, "terrain": 7, "musique": "1a3a2a5a", "driver_stats": "18%", "consensus": "cité par 6 sources, base", "meteo_avantage": 7},
+    {"num": 2, "nom": "Cheval B", "cote": "9.0", "presse": 7, "forme": 8, "terrain": 6, "musique": "2a2a4a1a", "driver_stats": "14%", "consensus": "cité par 5 sources", "meteo_avantage": 6},
+    {"num": 3, "nom": "Cheval C", "cote": "18.0", "presse": 5, "forme": 6, "terrain": 8, "musique": "6a3aDa2a", "driver_stats": "9%", "consensus": "tocard cité par 2 sources", "meteo_avantage": 8},
+    {"num": 4, "nom": "Cheval D", "cote": "4.2", "presse": 9, "forme": 7.5, "terrain": 7, "musique": "1a1a4a3a", "driver_stats": "20%", "consensus": "favori, cité par 8 sources", "meteo_avantage": 7},
+    {"num": 5, "nom": "Cheval E", "cote": "13.0", "presse": 6, "forme": 6.5, "terrain": 6, "musique": "4a5a2a7a", "driver_stats": "11%", "consensus": "neutre", "meteo_avantage": 6},
+    {"num": 6, "nom": "Cheval F", "cote": "22.0", "presse": 4, "forme": 5.5, "terrain": 7, "musique": "Da8a3a2a", "driver_stats": "7%", "consensus": "risque fautif", "meteo_avantage": 7},
+    {"num": 7, "nom": "Cheval G", "cote": "11.0", "presse": 6.5, "forme": 7, "terrain": 7, "musique": "3a4a3a1a", "driver_stats": "12%", "consensus": "cité par 3 sources", "meteo_avantage": 7},
+    {"num": 8, "nom": "Cheval H", "cote": "28.0", "presse": 4.5, "forme": 6, "terrain": 8, "musique": "7a2a6a4a", "driver_stats": "8%", "consensus": "outsider", "meteo_avantage": 8}
+  ]
+}
