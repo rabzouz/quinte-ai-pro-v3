@@ -951,6 +951,66 @@ function mergePartantLists(...lists){
   });
   return [...byNum.values()].sort((a,b)=>a.num-b.num);
 }
+function splitPartantRows(raw){
+  return String(raw||"")
+    .replace(/\r/g,"\n")
+    .replace(/<\s*(?:tr|li|br|p|div)\b[^>]*>/gi,"\n")
+    .replace(/<\s*\/\s*(?:tr|li|p|div)\s*>/gi,"\n")
+    .replace(/<[^>]+>/g," ")
+    .replace(/&nbsp;/gi," ")
+    .replace(/&amp;/gi,"&")
+    .replace(/[•●]/g,"\n")
+    .replace(/([;\t])\s*(?=(?:N[°ºo]?\s*)?\d{1,2}\s*[.)\]:|–—-]\s*)/gi,"\n")
+    .replace(/\s+(?=(?:N[°ºo]?\s*)?\d{1,2}\s*[.)\]:|–—-]\s+[A-ZÀ-ÖØ-Ý])/g,"\n")
+    .split("\n")
+    .map(l=>l.replace(/\s+/g," ").trim())
+    .filter(Boolean);
+}
+function cleanExtractedHorseName(rest){
+  let s=String(rest||"")
+    .replace(/^\s*[-–—:|.)\]]+\s*/," ")
+    .replace(/\b(?:cheval|partant|num(?:é|e)ro|n[°ºo])\b\s*[:=]?\s*/ig," ")
+    .replace(/\b(?:cote|pmu|odds|rapport)\s*[:=]?\s*\d{1,3}(?:[,.]\d+)?\s*(?:\/\s*1)?/ig," ")
+    .replace(/\b(?:NP|non\s*partant)\b/ig," ")
+    .replace(/\b(?:corde|poids|driver|jockey|entra[iî]neur|musique|gains|sexe|age|âge)\b\s*[:=]?.*$/i," ")
+    .replace(/\s+\(?[HMF]\s*\/?\s*\d{1,2}\s*ans?\)?.*$/i," ")
+    .replace(/\s+\d{1,3}(?:[,.]\d+)?\s*(?:\/\s*1)?\b.*$/," ")
+    .replace(/[|;·].*$/," ")
+    .replace(/\([^)]{0,80}\)/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+  const words=s.split(" ").filter(Boolean);
+  if(words.length>8) s=words.slice(0,8).join(" ");
+  return s;
+}
+function expectedRunnerCount(raw, partants=[]){
+  const text=String(raw||"");
+  const explicit=[
+    /\b(\d{1,2})\s+(?:partants?|chevaux|concurrents?|participants?)\b/i,
+    /\b(?:partants?|chevaux|concurrents?)\s*[:=]\s*(\d{1,2})\b/i
+  ];
+  for(const re of explicit){
+    const m=text.match(re);
+    const n=m?parseInt(m[1],10):0;
+    if(n>=8&&n<=30) return n;
+  }
+  const nums=[...text.matchAll(/\b(?:N[°ºo]?\s*)?(\d{1,2})\s*[.)\]:|–—-]\s+[A-ZÀ-ÖØ-Ý][A-ZÀ-ÖØ-Ý' .-]{2,}/g)]
+    .map(m=>parseInt(m[1],10))
+    .filter(n=>n>=1&&n<=30);
+  const maxNum=Math.max(0,...nums, ...(partants||[]).map(p=>parseInt(p.num,10)||0));
+  return maxNum>=Math.max(10,(partants||[]).length)?maxNum:0;
+}
+function addMissingNumberPlaceholders(partants, raw){
+  const merged=mergePartantLists(partants);
+  const expected=expectedRunnerCount(raw, merged);
+  if(!expected||merged.length>=expected) return merged;
+  const nums=new Set(merged.map(p=>p.num));
+  const missing=[];
+  for(let n=1;n<=expected;n++){
+    if(!nums.has(n)) missing.push({num:n,nom:`N°${n} à vérifier`,cote:"?",contexte:"nom à compléter"});
+  }
+  return mergePartantLists(merged, missing);
+}
 function extractPartantsFromText(raw){
   const partants=[];
   const seen=new Set();
@@ -958,13 +1018,16 @@ function extractPartantsFromText(raw){
 
   try{
     const obj=parseTolerant(text);
-    if(Array.isArray(obj.partants)) return mergePartantLists(obj.partants);
+    if(Array.isArray(obj.partants)) return addMissingNumberPlaceholders(obj.partants, text);
   }catch(e){}
 
-  text.split("\n").forEach(line=>{
+  splitPartantRows(text).forEach(line=>{
     let l=line.replace(/\s+/g," ").trim();
     if(!l||/R\d+\s*C\d+/i.test(l)||/prix|hippodrome|distance|allocation/i.test(l)) return;
-    const m=l.match(/^(?:[-*]\s*)?(?:n[°o]?\s*)?(\d{1,2})\s*(?:[.)\-:|]\s+|\s+)(.{3,})$/i);
+    if(/^\d{1,2}\s+(?:partants?|chevaux|concurrents?|participants?)\b/i.test(l)) return;
+    if(/^(?:partants?|chevaux|concurrents?|participants?)\s*[:=]\s*\d{1,2}\b/i.test(l)) return;
+    const m=l.match(/^(?:[-*]\s*)?(?:n[°ºo]?\s*)?(\d{1,2})\s*(?:[.)\]:|–—-]\s+|\s+)(.{3,})$/i) ||
+      l.match(/\b(?:n[°ºo]?\s*)?(\d{1,2})\s*(?:[.)\]:|–—-]\s+|\s+)([A-ZÀ-ÖØ-Ý][A-ZÀ-ÖØ-Ý' .-]{2,})/);
     if(!m) return;
     const num=parseInt(m[1],10);
     if(num<1||num>30||seen.has(num)) return;
@@ -972,19 +1035,12 @@ function extractPartantsFromText(raw){
     const np=/\b(?:NP|non\s*partant)\b/i.test(rest);
     const coteM=rest.match(/\b(?:cote\s*)?(\d{1,3}(?:[,.]\d+)?\s*(?:\/\s*1)?)\b/i);
     const cote=coteM?coteM[1].replace(/\s+/g,""):"?";
-    rest=rest
-      .replace(/\b(?:cote|pmu|odds)\s*[:=]?\s*\d{1,3}(?:[,.]\d+)?\s*(?:\/\s*1)?/ig," ")
-      .replace(/\b(?:corde|poids|driver|jockey|entraineur|entraîneur)\b.*$/i," ")
-      .replace(/\b(?:NP|non\s*partant)\b/ig," ")
-      .replace(/[·|;].*$/," ")
-      .trim();
-    const words=rest.split(" ").filter(Boolean);
-    if(words.length>7) rest=words.slice(0,7).join(" ");
+    rest=cleanExtractedHorseName(rest);
     if(rest.length<2) return;
     seen.add(num);
     partants.push(normalizePartant({num,nom:rest,cote,np}));
   });
-  return mergePartantLists(partants);
+  return addMissingNumberPlaceholders(partants, text);
 }
 function compactPartantsForPrompt(partants, fallbackText){
   if(partants&&partants.length){
@@ -1206,10 +1262,33 @@ async function runAutoFetch(){
     }], true, 3500);
 
     basePartants = extractPartantsFromText(rawCourse);
+    let expectedCount = expectedRunnerCount(rawCourse, basePartants);
+
+    if(basePartants.length<10 || (expectedCount && basePartants.length<expectedCount)){
+      setProg(20,"🔎 Vérification partants...");
+      appendLog(`\n⚠️ Liste partants incomplète détectée (${basePartants.length}/${expectedCount||"?"}). Seconde recherche ciblée...`);
+      const rawPartantsOnly = await callAPI([{role:"user",content:
+        `Recherche uniquement la LISTE OFFICIELLE COMPLÈTE des partants du Quinté+ PMU du ${dateFr}.\n\n`+
+        `Sources prioritaires: PMU officiel, open-pmu-api, programme PMU, Geny, Paris-Turf, Canalturf, Zone-Turf.\n`+
+        `Retourne uniquement un JSON strict, sans commentaire:\n`+
+        `{"partants":[{"num":1,"nom":"NOM CHEVAL","cote":"?","np":false}],"source":"...","total":0}\n\n`+
+        `Règles: tous les numéros officiels, dans l'ordre; si une cote manque mets "?"; indique les non-partants avec np=true.`
+      }], true, 2500);
+      let rescuePartants=[];
+      try{
+        const rescue=parseTolerant(rawPartantsOnly);
+        rescuePartants=Array.isArray(rescue.partants)?rescue.partants:extractPartantsFromText(rawPartantsOnly);
+        if(parseInt(rescue.total,10)>=8&&parseInt(rescue.total,10)<=30) expectedCount=parseInt(rescue.total,10);
+      }catch(e){
+        rescuePartants=extractPartantsFromText(rawPartantsOnly);
+      }
+      basePartants = addMissingNumberPlaceholders(mergePartantLists(basePartants, rescuePartants), rawCourse+"\n"+rawPartantsOnly);
+    }
+
     const partantsPrompt = compactPartantsForPrompt(basePartants, rawCourse);
 
     setProg(22,"✅ Course récupérée");
-    appendLog(`\n✅ Course & partants : ${basePartants.length||"?"} détectés\n${rawCourse.substring(0,500)}...`);
+    appendLog(`\n✅ Course & partants : ${basePartants.length||"?"}${expectedCount?`/${expectedCount}`:""} détectés\n${rawCourse.substring(0,500)}...`);
 
     // ════ ÉTAPE 2 : PROFILS CHEVAUX (musique, sexe, âge, gains) ════
     setProg(26,"🐎 2/5 — Profils chevaux...");
@@ -1309,7 +1388,8 @@ async function runAutoFetch(){
       `  "np_list":"N°X","source":"web","note":"..."\n`+
       `}\n\n`+
       `RÈGLES STRICTES:\n`+
-      `- Le tableau "partants" doit contenir EXACTEMENT tous les numéros de la liste de référence ci-dessus, dans l'ordre, même si certaines infos manquent\n`+
+      `- Le tableau "partants" doit contenir EXACTEMENT ${basePartants.length||"tous les"} chevaux de la liste de référence ci-dessus, dans l'ordre, même si certaines infos manquent\n`+
+      `- Ne supprime jamais un numéro de référence; si le nom ou les détails manquent, garde "N°X à vérifier" et complète plus tard\n`+
       `- Si une information est introuvable, mets "?" mais garde le cheval\n`+
       `- Interdit d'écrire une note générique du type "Plusieurs infos manquantes, faute de données publiques" si la course et les partants sont identifiés\n`+
       `- La note doit être opérationnelle: "liste officielle OK", "cotes partielles", "consensus presse partiel", etc.\n`+
@@ -1326,7 +1406,7 @@ async function runAutoFetch(){
 
     setProg(94,"🔍 Parsing...");
     const parsed = parseTolerant(jsonTxt);
-    parsed.partants = mergePartantLists(basePartants, parsed.partants||[]);
+    parsed.partants = addMissingNumberPlaceholders(mergePartantLists(basePartants, parsed.partants||[]), rawCourse);
 
     if(!parsed.partants||parsed.partants.length===0)
       throw new Error("Aucun partant trouvé — course peut-être pas encore publiée");
