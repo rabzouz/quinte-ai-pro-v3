@@ -645,6 +645,31 @@ const SOURCE_LINKS=[
 function sourcePromptBlock(){
   return SOURCE_LINKS.map((u,i)=>`${i+1}. ${u}`).join("\n");
 }
+function prioritySourcePromptBlock(){
+  return [
+    "1. PMU officiel: quinté du jour, programme, partants, cotes",
+    "2. Open PMU API / API PMU programme: arrivée, programme, réunions",
+    "3. Geny / Paris-Turf / Canalturf: partants, musique, jockey/driver, entraîneur",
+    "4. Turfomania / Turfoo / OutilTurfiste / Zone-Turf: consensus presse et bases/tocards",
+    "5. LeTROT / France Galop / Equidia: discipline, piste, profils officiels si utile"
+  ].join("\n");
+}
+function cleanDataNote(note, partants){
+  const n=String(note||"").trim();
+  if(!n) return "";
+  const bad=/plusieurs infos manquantes|faute de données publiques|données publiques|impossible de vérifier|non disponible publiquement/i.test(n);
+  if(bad && Array.isArray(partants) && partants.length>=8)
+    return "Recherche multi-sources terminée. Les champs non confirmés sont marqués '?' sans pénaliser la liste des partants.";
+  return n;
+}
+function dataQualityLabel(partants){
+  const arr=Array.isArray(partants)?partants:[];
+  if(!arr.length) return "aucune donnée";
+  const fields=["cote","musique","driver","entraineur","consensus_presse","forme_tendance"];
+  const filled=arr.reduce((s,p)=>s+fields.reduce((n,k)=>n+(p[k]&&p[k]!=="?"?1:0),0),0);
+  const pct=Math.round(filled/(arr.length*fields.length)*100);
+  return `${pct}% champs utiles confirmés`;
+}
 
 // ═══════════════════════════════════════════════════════
 // DATE PICKER
@@ -1168,7 +1193,9 @@ async function runAutoFetch(){
       `Recherche sur PLUSIEURS sites le Quinté+ PMU du ${dateFr}. `+
       `Consulte et croise : pmu.fr, geny.com, zone-turf.fr, canalturf.com, turfomania.fr, paris-turf.com, equidia.fr, letrot.com. `+
       `Si un site n'a pas l'info, essaie le suivant.\n\n`+
-      `SOURCES/API COMPLÉMENTAIRES À EXPLOITER EN PRIORITÉ SI DISPONIBLES:\n${sourcePromptBlock()}\n\n`+
+      `PLAN DE RECHERCHE PRIORITAIRE, RAPIDE ET VÉRIFIABLE:\n${prioritySourcePromptBlock()}\n\n`+
+      `LISTE COMPLÈTE DES SOURCES/API DISPONIBLES:\n${sourcePromptBlock()}\n\n`+
+      `Méthode obligatoire: commence par identifier la course et la liste officielle des partants, puis complète seulement les champs utiles. Ne réponds pas par une formule générique du type "données publiques manquantes" si tu as au moins la liste des partants.\n\n`+
       `Fournis IMPÉRATIVEMENT :\n`+
       `- Nom exact du Prix, hippodrome, ville, heure départ, distance, type de piste, discipline, allocation, n° réunion/course (RxCx)\n`+
       `- Liste complète numérotée de TOUS les partants : N°, NOM exact, COTE PMU (ex: 5/1 ou 12.5), n° corde ou poids\n`+
@@ -1247,6 +1274,7 @@ async function runAutoFetch(){
 
     const finalPrompt=
       `Données collectées sur le Quinté+ du ${dateStr}:\n\n`+
+      `=== PLAN PRIORITAIRE UTILISÉ ===\n${prioritySourcePromptBlock()}\n\n`+
       `=== SOURCES/API DISPONIBLES ===\n${sourcePromptBlock()}\n\n`+
       `=== PARTANTS DE RÉFÉRENCE À CONSERVER OBLIGATOIREMENT (${basePartants.length||"nombre inconnu"}) ===\n${partantsPrompt}\n\n`+
       `=== COURSE & PARTANTS ===\n${rawCourse}\n\n`+
@@ -1283,6 +1311,8 @@ async function runAutoFetch(){
       `RÈGLES STRICTES:\n`+
       `- Le tableau "partants" doit contenir EXACTEMENT tous les numéros de la liste de référence ci-dessus, dans l'ordre, même si certaines infos manquent\n`+
       `- Si une information est introuvable, mets "?" mais garde le cheval\n`+
+      `- Interdit d'écrire une note générique du type "Plusieurs infos manquantes, faute de données publiques" si la course et les partants sont identifiés\n`+
+      `- La note doit être opérationnelle: "liste officielle OK", "cotes partielles", "consensus presse partiel", etc.\n`+
       `- JSON COMPLET et VALIDE obligatoire (ferme bien tous les crochets et accolades)\n`+
       `- Garde "contexte" TRÈS court (max 8 mots) pour ne pas dépasser la limite\n`+
       `- forme/presse/terrain/meteo_avantage sur 10\n`+
@@ -1325,6 +1355,8 @@ async function runAutoFetch(){
 
     setProg(98,"✅ Affichage...");
     document.getElementById("autoLog").className="auto-box ok";
+    const cleanNote=cleanDataNote(parsed.note, parsed.partants);
+    const quality=dataQualityLabel(parsed.partants);
     logAuto(
       `✅ Récupération enrichie complète (5/5)\n\n`+
       `📍 ${COURSE.prix} — ${COURSE.hippo} ${COURSE.num_course?`(${COURSE.num_course})`:''}\n`+
@@ -1333,10 +1365,11 @@ async function runAutoFetch(){
       `🌦️ ${METEO.conditions||"?"} ${METEO.temp||""} · Vent ${METEO.vent||"?"} · Pluie ${METEO.pluie_risque||"?"}\n`+
       `   Impact: ${METEO.impact_piste||"?"}\n`+
       `🐴 ${parsed.partants.length} partants analysés en détail\n`+
+      `📊 Qualité données: ${quality}\n`+
       `🚫 NP: ${parsed.np_list||"aucun"}\n`+
       `🃏 Joker: N°${parsed.joker_principal?.num||"?"} ${parsed.joker_principal?.nom||""}\n`+
       `   ${parsed.joker_principal?.raison||""}\n`+
-      `📝 ${parsed.note||""}`
+      `📝 ${cleanNote}`
     );
 
     renderAutoPreview(parsed.partants, parsed.joker_principal);
